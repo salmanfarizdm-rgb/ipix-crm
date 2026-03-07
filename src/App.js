@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
@@ -671,38 +671,235 @@ function LeadsPage({leads,setLeads,role,isMobile,onOpenLead}){
 /* ── BULK IMPORT ─────────────────────────────────────────────────────── */
 function BulkImportModal({leads,setLeads,role,onClose}){
   const fp=ROLES[role];
-  const [csvText,setCsvText]=useState("");
+  const [activeTab,setActiveTab]=useState("photo"); // photo | excel | csv
   const [parsed,setParsed]=useState([]);
   const [dupes,setDupes]=useState([]);
-  const parse=()=>{
-    const rows=csvText.trim().split("\n").slice(1);
-    const results=rows.map((r,idx)=>{const cols=r.split(",");return{id:`IMP${Date.now()}${idx}`,company:cols[0]?.trim()||"",contact:cols[1]?.trim()||"",phone:cols[2]?.trim()||"",email:cols[3]?.trim()||"",source:cols[4]?.trim()||"Google Ads",service:cols[5]?.trim()||"",dealValue:Number(cols[6])||0,score:"Cold",status:"New",assignedTo:"",assignStatus:"unassigned",createdDate:TODAY,stageEnteredDate:TODAY,wonDate:null,followUpDate:"—",lastContactDate:"",expectedCredit:"",creditChanges:[],remarks:"",lostReason:"",disqReason:"",proposalViewed:false,proposalViewedAt:null,budgetConfirmed:false,timelineConfirmed:false,qualChecklist:{budget:false,decisionMaker:false,requirement:false,timeline:false},nps:null,notes:[],tasks:[],history:[{action:"Lead Imported via CSV",by:fp.label,date:TODAY,time:"Now"}]};});
-    const d=results.filter(r=>leads.some(l=>(l.phone&&l.phone===r.phone)||(l.email&&l.email===r.email)));
+  const [aiLoading,setAiLoading]=useState(false);
+  const [aiError,setAiError]=useState("");
+  const [imgPreview,setImgPreview]=useState(null);
+  const [csvText,setCsvText]=useState("");
+  const [importDone,setImportDone]=useState(false);
+  const fileRef=React.useRef();
+  const excelRef=React.useRef();
+
+  const buildLead=(obj,idx)=>({
+    id:`IMP${Date.now()}${idx}`,
+    company:obj.company||obj.Company||"",
+    contact:obj.contact||obj.Contact||obj.name||obj.Name||"",
+    phone:String(obj.phone||obj.Phone||obj.Number||obj.number||""),
+    email:obj.email||obj.Email||"",
+    role:obj.role||obj.Role||"",
+    location:obj.location||obj.Location||"Kerala",
+    source:obj.source||obj.Source||"Google Ads",
+    service:obj.service||obj.Service||obj.product||obj.Product||"",
+    dealValue:Number(obj.dealValue||obj.DealValue||obj.deal_value||0),
+    score:"Cold",status:"New",assignedTo:"",assignStatus:"unassigned",
+    createdDate:obj.date||obj.Date||TODAY,
+    stageEnteredDate:TODAY,wonDate:null,
+    followUpDate:obj.followUp||obj.follow_up||"—",
+    lastContactDate:"",expectedCredit:"",creditChanges:[],
+    remarks:obj.remarks||obj.Remarks||obj.notes||obj.Notes||"",
+    lostReason:"",disqReason:"",proposalViewed:false,proposalViewedAt:null,
+    budgetConfirmed:false,timelineConfirmed:false,
+    qualChecklist:{budget:false,decisionMaker:false,requirement:false,timeline:false},
+    nps:null,notes:[],tasks:[],
+    history:[{action:"Lead Imported via Bulk Import",by:fp.label,date:TODAY,time:"Now"}]
+  });
+
+  const finaliseParsed=(rows)=>{
+    const results=rows.map((r,i)=>buildLead(r,i)).filter(r=>r.company||r.contact||r.phone);
+    const d=results.filter(r=>leads.some(l=>(l.phone&&l.phone===r.phone)||(l.email&&r.email&&l.email===r.email)));
     setDupes(d.map(r=>r.id));
     setParsed(results);
   };
-  const importAll=()=>{const toImport=parsed.filter(r=>!dupes.includes(r.id));setLeads(ls=>[...ls,...toImport]);onClose();};
+
+  /* ── AI Photo Scan ── */
+  const handlePhoto=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=async(ev)=>{
+      const b64=ev.target.result.split(",")[1];
+      setImgPreview(ev.target.result);
+      setAiLoading(true);setAiError("");setParsed([]);
+      try{
+        const res=await fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:"claude-sonnet-4-20250514",max_tokens:1000,
+            messages:[{role:"user",content:[
+              {type:"image",source:{type:"base64",media_type:file.type||"image/png",data:b64}},
+              {type:"text",text:`This is a lead/CRM spreadsheet. Extract ALL visible lead rows into a JSON array. Each object must have these keys (use empty string if not found): company, contact, phone, email, source, service, date, remarks. Return ONLY valid JSON array, no markdown, no explanation. Example: [{"company":"Acme","contact":"John","phone":"+91 9999","email":"","source":"LMS","service":"LMS","date":"","remarks":""}]`}
+            ]}]
+          })
+        });
+        const data=await res.json();
+        const text=data.content?.find(b=>b.type==="text")?.text||"[]";
+        const clean=text.replace(/```json|```/g,"").trim();
+        const arr=JSON.parse(clean);
+        finaliseParsed(Array.isArray(arr)?arr:[]);
+      }catch(err){setAiError("Could not extract data. Please try a clearer image or use CSV/Excel.");}
+      setAiLoading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  /* ── Excel Upload ── */
+  const handleExcel=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    try{
+      const {read,utils}=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+      const buf=await file.arrayBuffer();
+      const wb=read(buf);
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=utils.sheet_to_json(ws,{defval:""});
+      finaliseParsed(rows);
+    }catch(err){setAiError("Could not read Excel file. Make sure it's a valid .xlsx file.");}
+  };
+
+  /* ── CSV Parse ── */
+  const parseCsv=()=>{
+    const rows=csvText.trim().split("\n");
+    const headers=rows[0].split(",").map(h=>h.trim().toLowerCase().replace(/\s+/g,""));
+    const map={company:["company","companyname"],contact:["contact","name","contactname"],phone:["phone","mobile","number","phonenumber"],email:["email"],source:["source","leadsource"],service:["service","product","leadsource2"],date:["date","createddate"],remarks:["remarks","notes","status","followup"]};
+    const getVal=(obj,keys)=>{for(const k of keys){const found=Object.keys(obj).find(h=>keys.includes(h.toLowerCase().replace(/\s+/g,"")));if(found)return obj[found];}return "";};
+    const data=rows.slice(1).map(r=>{const cols=r.split(",");const obj={};headers.forEach((h,i)=>obj[h]=cols[i]?.trim()||"");return{company:getVal(obj,map.company)||obj[headers[0]]||"",contact:getVal(obj,map.contact)||obj[headers[1]]||"",phone:getVal(obj,map.phone)||obj[headers[2]]||"",email:getVal(obj,map.email)||"",source:getVal(obj,map.source)||"Google Ads",service:getVal(obj,map.service)||"",date:getVal(obj,map.date)||"",remarks:getVal(obj,map.remarks)||""};});
+    finaliseParsed(data);
+  };
+
+  /* ── Sample Excel Download ── */
+  const downloadSample=async()=>{
+    try{
+      const {utils,writeFile}=await import("https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs");
+      const sampleData=[
+        {Date:"3-Feb-2026",Name:"Muhammed Junaid K",Phone:"+918078952613",Email:"junaid@example.com","Company Name":"TechCorp Pvt Ltd",Source:"Google Ads",Service:"LMS",DealValue:150000,Location:"Kerala",Remarks:"Interested in demo"},
+        {Date:"3-Feb-2026",Name:"Aaryan Menon",Phone:"+919745143143",Email:"lukatmeee@gmail.com","Company Name":"",Source:"Meta",Service:"Mobile App",DealValue:80000,Location:"Kerala",Remarks:"Ask to call later"},
+        {Date:"5-Feb-2026",Name:"Suraj P Pilanku",Phone:"+918078252505",Email:"pilanikusuraj@gmail.com","Company Name":"Impression",Source:"Website",Service:"Web Development",DealValue:60000,Location:"Kerala",Remarks:"Share details"},
+      ];
+      const ws=utils.json_to_sheet(sampleData);
+      ws["!cols"]=[{wch:12},{wch:22},{wch:16},{wch:28},{wch:22},{wch:14},{wch:18},{wch:12},{wch:12},{wch:30}];
+      const wb=utils.book_new();
+      utils.book_append_sheet(wb,ws,"Leads");
+      writeFile(wb,"IPIX_Lead_Import_Sample.xlsx");
+    }catch(err){alert("Could not generate sample file.");}
+  };
+
+  const importAll=()=>{
+    const toImport=parsed.filter(r=>!dupes.includes(r.id));
+    setLeads(ls=>[...ls,...toImport]);
+    setImportDone(true);
+    setTimeout(()=>onClose(),1200);
+  };
+
+  const tabStyle=(id)=>({padding:"7px 16px",borderRadius:7,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:activeTab===id?C.accent:"transparent",color:activeTab===id?"#fff":C.muted});
+
   return(
-    <Modal title="📥 Bulk Lead Import (CSV)" onClose={onClose} mw={640}>
-      <div style={{display:"flex",flexDirection:"column",gap:12}}>
-        <div style={{padding:"10px 14px",background:`${C.accent}10`,borderRadius:8,fontSize:11,color:C.muted}}>Expected CSV format (first row = header):<br/><code style={{color:C.accent}}>Company,Contact,Phone,Email,Source,Service,DealValue</code></div>
-        <div><label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8}}>Paste CSV Data</label><textarea value={csvText} onChange={e=>setCsvText(e.target.value)} placeholder={"Company,Contact,Phone,Email,Source,Service,DealValue\nAcme Corp,John Doe,+91 9999999999,john@acme.com,Google Ads,LMS,150000"} style={{marginTop:4,background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,padding:"8px 10px",fontSize:12,outline:"none",width:"100%",minHeight:120,resize:"vertical",boxSizing:"border-box",fontFamily:"monospace"}}/></div>
-        <Btn onClick={parse} disabled={!csvText.trim()}>Parse CSV</Btn>
+    <Modal title="📥 Bulk Lead Import" onClose={onClose} mw={720}>
+      <div style={{display:"flex",flexDirection:"column",gap:14}}>
+
+        {/* Download sample */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 14px",background:`${C.green}10`,border:`1px solid ${C.green}33`,borderRadius:10}}>
+          <div>
+            <div style={{fontSize:12,fontWeight:700,color:C.green}}>📄 Download Sample Excel Format</div>
+            <div style={{fontSize:11,color:C.muted,marginTop:2}}>Matches your existing lead sheet — Date, Name, Phone, Email, Company, Source, Service, Deal Value, Location, Remarks</div>
+          </div>
+          <Btn v="success" sz="sm" onClick={downloadSample}>⬇ Sample Excel</Btn>
+        </div>
+
+        {/* Tabs */}
+        <div style={{display:"flex",gap:4,background:C.faint,borderRadius:10,padding:4}}>
+          <button style={tabStyle("photo")} onClick={()=>setActiveTab("photo")}>📸 Scan Sheet Photo</button>
+          <button style={tabStyle("excel")} onClick={()=>setActiveTab("excel")}>📊 Upload Excel / CSV File</button>
+          <button style={tabStyle("csv")} onClick={()=>setActiveTab("csv")}>📋 Paste CSV Text</button>
+        </div>
+
+        {/* Photo Tab */}
+        {activeTab==="photo"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{padding:"10px 14px",background:`${C.purple}10`,border:`1px solid ${C.purple}33`,borderRadius:8,fontSize:11,color:C.muted}}>
+              📸 Take a photo of your lead sheet (like the one above) and AI will extract all leads automatically.
+            </div>
+            <div
+              style={{border:`2px dashed ${C.border}`,borderRadius:12,padding:"28px 20px",textAlign:"center",cursor:"pointer",background:C.faint}}
+              onClick={()=>fileRef.current.click()}
+            >
+              {imgPreview
+                ?<img src={imgPreview} alt="uploaded" style={{maxWidth:"100%",maxHeight:200,borderRadius:8,objectFit:"contain"}}/>
+                :<div><div style={{fontSize:28,marginBottom:8}}>📷</div><div style={{fontSize:13,fontWeight:600,color:C.muted}}>Click to upload sheet photo</div><div style={{fontSize:11,color:C.muted,marginTop:4}}>Supports PNG, JPG, JPEG, WEBP</div></div>
+              }
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
+            {aiLoading&&<div style={{display:"flex",alignItems:"center",gap:10,padding:"12px 16px",background:`${C.accent}10`,borderRadius:8,fontSize:12,color:C.accent}}><span style={{animation:"pulse 1s infinite",fontSize:16}}>🤖</span> AI is reading your sheet… extracting leads…</div>}
+            {aiError&&<div style={{padding:"10px 14px",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:8,fontSize:12,color:C.red}}>⚠️ {aiError}</div>}
+          </div>
+        )}
+
+        {/* Excel Tab */}
+        {activeTab==="excel"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{padding:"10px 14px",background:`${C.accent}10`,border:`1px solid ${C.accent}33`,borderRadius:8,fontSize:11,color:C.muted}}>
+              Upload your .xlsx or .csv file. Column headers are auto-detected — works best with the sample format above.
+            </div>
+            <div
+              style={{border:`2px dashed ${C.border}`,borderRadius:12,padding:"32px 20px",textAlign:"center",cursor:"pointer",background:C.faint}}
+              onClick={()=>excelRef.current.click()}
+            >
+              <div style={{fontSize:28,marginBottom:8}}>📊</div>
+              <div style={{fontSize:13,fontWeight:600,color:C.muted}}>Click to upload Excel / CSV file</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:4}}>.xlsx, .xls, .csv supported</div>
+            </div>
+            <input ref={excelRef} type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={handleExcel}/>
+            {aiError&&<div style={{padding:"10px 14px",background:`${C.red}10`,border:`1px solid ${C.red}33`,borderRadius:8,fontSize:12,color:C.red}}>⚠️ {aiError}</div>}
+          </div>
+        )}
+
+        {/* CSV Tab */}
+        {activeTab==="csv"&&(
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{padding:"10px 14px",background:`${C.accent}10`,borderRadius:8,fontSize:11,color:C.muted}}>
+              Paste CSV data. First row = headers.<br/>
+              <code style={{color:C.accent,fontSize:10}}>Date,Name,Phone,Email,Company Name,Source,Service,DealValue,Location,Remarks</code>
+            </div>
+            <textarea value={csvText} onChange={e=>setCsvText(e.target.value)}
+              placeholder={"Date,Name,Phone,Email,Company Name,Source,Service,DealValue,Location,Remarks\n3-Feb-2026,Muhammed Junaid K,+918078952613,,TechCorp,Google Ads,LMS,150000,Kerala,Demo interested"}
+              style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,padding:"8px 10px",fontSize:11,outline:"none",width:"100%",minHeight:130,resize:"vertical",boxSizing:"border-box",fontFamily:"monospace"}}/>
+            <Btn onClick={parseCsv} disabled={!csvText.trim()}>Parse CSV</Btn>
+          </div>
+        )}
+
+        {/* Preview Table */}
         {parsed.length>0&&(
           <div>
-            <div style={{fontSize:12,fontWeight:700,marginBottom:8}}>{parsed.length} rows parsed · <span style={{color:C.red}}>{dupes.length} duplicate(s) detected</span></div>
-            <div style={{maxHeight:200,overflowY:"auto",border:`1px solid ${C.border}`,borderRadius:8}}>
-              <table style={{width:"100%",borderCollapse:"collapse"}}>
-                <thead><tr><TH ch="Company"/><TH ch="Contact"/><TH ch="Phone"/><TH ch="Service"/><TH ch="Status"/></tr></thead>
-                <tbody>{parsed.map(r=>(<tr key={r.id} style={{background:dupes.includes(r.id)?`${C.red}10`:"transparent"}}>
-                  <TD>{r.company}</TD><TD style={{fontSize:11}}>{r.contact}</TD><TD style={{fontSize:11}}>{r.phone}</TD><TD style={{fontSize:11}}>{r.service}</TD>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+              <div style={{fontSize:12,fontWeight:700}}>
+                {parsed.length} leads found ·{" "}
+                <span style={{color:C.green}}>{parsed.length-dupes.length} new</span> ·{" "}
+                <span style={{color:C.red}}>{dupes.length} duplicate(s)</span>
+              </div>
+              {importDone&&<Badge label="✅ Imported!" color={C.green}/>}
+            </div>
+            <div style={{maxHeight:220,overflowY:"auto",border:`1px solid ${C.border}`,borderRadius:10}}>
+              <table style={{width:"100%",borderCollapse:"collapse",minWidth:580}}>
+                <thead><tr><TH ch="#"/><TH ch="Company"/><TH ch="Contact"/><TH ch="Phone"/><TH ch="Source"/><TH ch="Service"/><TH ch="Status"/></tr></thead>
+                <tbody>{parsed.map((r,i)=>(<tr key={r.id} style={{background:dupes.includes(r.id)?`${C.red}08`:"transparent"}}>
+                  <TD style={{fontSize:10,color:C.muted}}>{i+1}</TD>
+                  <TD style={{fontWeight:600}}>{r.company||<span style={{color:C.muted}}>—</span>}</TD>
+                  <TD style={{fontSize:11}}>{r.contact}</TD>
+                  <TD style={{fontSize:11,color:C.muted}}>{r.phone}</TD>
+                  <TD style={{fontSize:11}}>{r.source}</TD>
+                  <TD style={{fontSize:11}}>{r.service||<span style={{color:C.muted}}>—</span>}</TD>
                   <TD>{dupes.includes(r.id)?<Badge label="Duplicate" color={C.red}/>:<Badge label="New" color={C.green}/>}</TD>
                 </tr>))}</tbody>
               </table>
             </div>
-            <div style={{display:"flex",gap:8,marginTop:10}}>
-              <Btn v="success" onClick={importAll}>Import {parsed.filter(r=>!dupes.includes(r.id)).length} New Leads</Btn>
-              <Btn v="ghost" onClick={onClose}>Cancel</Btn>
+            <div style={{display:"flex",gap:8,marginTop:12,alignItems:"center"}}>
+              <Btn v="success" onClick={importAll} disabled={importDone||parsed.filter(r=>!dupes.includes(r.id)).length===0}>
+                ✅ Import {parsed.filter(r=>!dupes.includes(r.id)).length} New Leads
+              </Btn>
+              {dupes.length>0&&<span style={{fontSize:11,color:C.muted}}>{dupes.length} duplicate(s) will be skipped</span>}
+              <Btn v="ghost" onClick={onClose} style={{marginLeft:"auto"}}>Cancel</Btn>
             </div>
           </div>
         )}
