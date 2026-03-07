@@ -200,26 +200,9 @@ function QualChecklist({lead,setLeads,role,onClose}){
           {checks[k]&&<span style={{marginLeft:"auto",color:C.green,fontWeight:700}}>✓</span>}
         </label>
       ))}
-      <div
-  style={{
-    padding: "10px 14px",
-    borderRadius: 8,
-    background: allPass ? `${C.green}12` : `${C.amber}12`,
-    border: `1px solid ${allPass ? C.green + "44" : C.amber + "44"}`,
-    fontSize: 12,
-    fontWeight: 700,
-    color: allPass ? C.green : C.amber
-  }}
->
-  {allPass
-    ? "✅ All criteria met – lead will be marked Qualified"
-    : "⚠️ " + items.filter(([k]) => !checks[k]).length + " criteria pending"}
-</div>
-
-<div style={{ display: "flex", gap: 8 }}>
-  <Btn v="success" onClick={save}>Save Checklist</Btn>
-  <Btn v="ghost" onClick={onClose}>Cancel</Btn>
-</div>
+      <div style={{padding:"10px 14px",borderRadius:8,background:allPass?`${C.green}12`:`${C.amber}12`,border:`1px solid ${allPass?C.green+"44":C.amber+"44}`,fontSize:12,fontWeight:700,color:allPass?C.green:C.amber}}>
+        {allPass?"✅ All criteria met – lead will be marked Qualified":"⚠️ "+items.filter(([k])=>!checks[k]).length+" criteria pending"}
+      </div>
       <div style={{display:"flex",gap:8}}><Btn v="success" onClick={save}>Save Checklist</Btn><Btn v="ghost" onClick={onClose}>Cancel</Btn></div>
     </div>
   );
