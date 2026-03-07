@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useState, useEffect } from "react";
+import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
 function useW() {
@@ -7,7 +7,6 @@ function useW() {
   useEffect(()=>{const h=()=>setW(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   return w;
 }
-const now=()=>{const d=new Date();return d.toISOString().split("T")[0];};
 const TODAY="2025-03-05";
 
 /* ── PALETTE ─────────────────────────────────────────────────────────── */
@@ -200,26 +199,9 @@ function QualChecklist({lead,setLeads,role,onClose}){
           {checks[k]&&<span style={{marginLeft:"auto",color:C.green,fontWeight:700}}>✓</span>}
         </label>
       ))}
-      <div
-  style={{
-    padding: "10px 14px",
-    borderRadius: 8,
-    background: allPass ? `${C.green}12` : `${C.amber}12`,
-    border: `1px solid ${allPass ? C.green + "44" : C.amber + "44"}`,
-    fontSize: 12,
-    fontWeight: 700,
-    color: allPass ? C.green : C.amber
-  }}
->
-  {allPass
-    ? "✅ All criteria met – lead will be marked Qualified"
-    : "⚠️ " + items.filter(([k]) => !checks[k]).length + " criteria pending"}
-</div>
-
-<div style={{ display: "flex", gap: 8 }}>
-  <Btn v="success" onClick={save}>Save Checklist</Btn>
-  <Btn v="ghost" onClick={onClose}>Cancel</Btn>
-</div>
+      <div style={{padding:"10px 14px",borderRadius:8,background:allPass?`${C.green}12`:`${C.amber}12`,border:`1px solid ${allPass?C.green+"44":C.amber+"44"}`,fontSize:12,fontWeight:700,color:allPass?C.green:C.amber}}>
+        {allPass?"✅ All criteria met – lead will be marked Qualified":"⚠️ "+items.filter(([k])=>!checks[k]).length+" criteria pending"}
+      </div>
       <div style={{display:"flex",gap:8}}><Btn v="success" onClick={save}>Save Checklist</Btn><Btn v="ghost" onClick={onClose}>Cancel</Btn></div>
     </div>
   );
@@ -573,7 +555,7 @@ function LeadsPage({leads,setLeads,role,isMobile,onOpenLead}){
 
   const fl=leads.filter(l=>{
     const s=search.toLowerCase();
-    return(l.company.toLowerCase().includes(s)||l.contact.toLowerCase().includes(s)||l.id.toLowerCase().includes(s))&&(!fStatus||l.status===fStatus)&&(!fScore||l.score===fScore)&&(!fSource||l.source===fSource)&&(!fAssign||l.assignStatus===fAssign);
+    return (l.company.toLowerCase().includes(s)||l.contact.toLowerCase().includes(s)||l.id.toLowerCase().includes(s))&&((!fStatus)||l.status===fStatus)&&((!fScore)||l.score===fScore)&&((!fSource)||l.source===fSource)&&((!fAssign)||l.assignStatus===fAssign);
   });
 
   const approve=id=>setLeads(ls=>ls.map(l=>l.id===id?{...l,assignStatus:"approved",history:[...l.history,{action:"Assignment Approved",by:fp.label,date:TODAY,time:"Now"}]}:l));
@@ -695,7 +677,7 @@ function BulkImportModal({leads,setLeads,role,onClose}){
   const parse=()=>{
     const rows=csvText.trim().split("\n").slice(1);
     const results=rows.map((r,idx)=>{const cols=r.split(",");return{id:`IMP${Date.now()}${idx}`,company:cols[0]?.trim()||"",contact:cols[1]?.trim()||"",phone:cols[2]?.trim()||"",email:cols[3]?.trim()||"",source:cols[4]?.trim()||"Google Ads",service:cols[5]?.trim()||"",dealValue:Number(cols[6])||0,score:"Cold",status:"New",assignedTo:"",assignStatus:"unassigned",createdDate:TODAY,stageEnteredDate:TODAY,wonDate:null,followUpDate:"—",lastContactDate:"",expectedCredit:"",creditChanges:[],remarks:"",lostReason:"",disqReason:"",proposalViewed:false,proposalViewedAt:null,budgetConfirmed:false,timelineConfirmed:false,qualChecklist:{budget:false,decisionMaker:false,requirement:false,timeline:false},nps:null,notes:[],tasks:[],history:[{action:"Lead Imported via CSV",by:fp.label,date:TODAY,time:"Now"}]};});
-    const d=results.filter(r=>leads.some(l=>l.phone&&l.phone===r.phone||l.email&&l.email===r.email));
+    const d=results.filter(r=>leads.some(l=>(l.phone&&l.phone===r.phone)||(l.email&&l.email===r.email)));
     setDupes(d.map(r=>r.id));
     setParsed(results);
   };
@@ -735,7 +717,7 @@ function AddLeadModal({leads,setLeads,role,onClose}){
   const [form,setForm]=useState({company:"",contact:"",phone:"",backupPhone:"",email:"",backupEmail:"",role:"",location:"",source:"",campaign:"",adGroup:"",score:"Hot",status:"New",service:"",dealValue:"",budgetConfirmed:false,timelineConfirmed:false,remarks:"",assignedTo:""});
   const [errs,setErrs]=useState({});
   const [dup,setDup]=useState(null);
-  useEffect(()=>{if(!form.phone&&!form.email)return;const d=leads.find(l=>(form.phone&&l.phone===form.phone)||(form.email&&l.email===form.email));setDup(d||null);},[form.phone,form.email]);
+  useEffect(()=>{if(!form.phone&&!form.email)return;const d=leads.find(l=>(form.phone&&l.phone===form.phone)||(form.email&&l.email===form.email));setDup(d||null);},[form.phone,form.email,leads]);
   const validate=()=>{const e={};if(!form.company.trim())e.company="Required";if(!form.contact.trim())e.contact="Required";if(!form.phone.trim())e.phone="Required";if(!form.email.trim())e.email="Required";if(!form.source)e.source="Required";if(!form.service.trim())e.service="Required";return e;};
   const save=()=>{const e=validate();if(Object.keys(e).length){setErrs(e);return;}const id=`L${String(leads.length+1).padStart(3,"0")}`;setLeads(ls=>[...ls,{id,...form,dealValue:Number(form.dealValue)||0,assignStatus:form.assignedTo?"pending":"unassigned",createdDate:TODAY,stageEnteredDate:TODAY,wonDate:null,followUpDate:"—",lastContactDate:"",expectedCredit:"",creditChanges:[],lostReason:"",disqReason:"",proposalViewed:false,proposalViewedAt:null,qualChecklist:{budget:form.budgetConfirmed,decisionMaker:false,requirement:false,timeline:form.timelineConfirmed},nps:null,notes:[],tasks:[],history:[{action:"Lead Created",by:fp.label,date:TODAY,time:"Now"},...(form.assignedTo?[{action:`Assigned to ${form.assignedTo} – Pending Approval`,by:fp.label,date:TODAY,time:"Now"}]:[])]}]);onClose();};
   return(
@@ -938,7 +920,6 @@ function ClientsPage({role,isMobile}){
   const [editMode,setEditMode]=useState(false);
   const [form,setForm]=useState({...clients[0]});
   const [errs,setErrs]=useState({});
-  const [teamModal,setTeamModal]=useState(null);
   const fp=ROLES[role];
 
   const pick=c=>{setSel(c);setForm({...c});setEditMode(false);setTab("overview");setErrs({});};
@@ -1287,7 +1268,7 @@ export default function CRM(){
   const totalAlerts=pendingCount+slaCount+agingCount+stuckCount;
   const todayFU=leads.filter(l=>l.followUpDate===TODAY).length;
 
-  useEffect(()=>{if(!allowed.includes(tab))setTab(allowed[0]||"dashboard");},[role]);
+  useEffect(()=>{if(!allowed.includes(tab))setTab(allowed[0]||"dashboard");},[role,allowed,tab]);
 
   const Sidebar=()=>(
     <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
