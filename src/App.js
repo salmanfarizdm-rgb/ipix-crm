@@ -1,6 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
+/* ── API ─────────────────────────────────────────────────────────────── */
+const API="https://ipix-backend-production.up.railway.app/api";
+async function apiFetch(path,opts={}){
+  const res=await fetch(API+path,{headers:{"Content-Type":"application/json"},...opts});
+  const json=await res.json();
+  if(!json.success)throw new Error(json.error||"API error");
+  return json.data;
+}
+
+/* ── MAP API LEAD → APP LEAD ─────────────────────────────────────────── */
+function mapLead(l){
+  return{
+    id:l.id, company:l.company||"", contact:l.contact||"", phone:l.phone||"",
+    backupPhone:l.backup_phone||"", email:l.email||"", backupEmail:l.backup_email||"",
+    role:l.role||"", location:l.location||"", source:l.source||"Google Ads",
+    campaign:l.campaign||"—", adGroup:l.ad_group||"—", score:l.score||"Cold",
+    status:l.status||"New", service:l.service||"", dealValue:l.deal_value||0,
+    budgetConfirmed:l.budget_confirmed||false, timelineConfirmed:l.timeline_confirmed||false,
+    assignedTo:l.assigned_to||"", assignStatus:l.assign_status||"unassigned",
+    createdDate:l.created_date||"", stageEnteredDate:l.stage_entered_date||"",
+    wonDate:l.won_date||null, followUpDate:l.follow_up_date||"—",
+    lastContactDate:l.last_contact_date||"", expectedCredit:l.expected_credit||"",
+    creditChanges:l.credit_changes||[], remarks:l.remarks||"",
+    lostReason:l.lost_reason||"", disqReason:l.disq_reason||"",
+    proposalViewed:l.proposal_viewed||false, proposalViewedAt:l.proposal_viewed_at||null,
+    qualChecklist:l.qual_checklist||{budget:false,decisionMaker:false,requirement:false,timeline:false},
+    nps:l.nps||null, notes:l.notes||[], tasks:l.tasks||[], history:l.history||[]
+  };
+}
+
+/* ── MAP APP LEAD → API LEAD ─────────────────────────────────────────── */
+function unmapLead(l){
+  return{
+    company:l.company, contact:l.contact, phone:l.phone, backup_phone:l.backupPhone,
+    email:l.email, backup_email:l.backupEmail, role:l.role, location:l.location,
+    source:l.source, campaign:l.campaign, ad_group:l.adGroup, score:l.score,
+    status:l.status, service:l.service, deal_value:l.dealValue,
+    budget_confirmed:l.budgetConfirmed, timeline_confirmed:l.timelineConfirmed,
+    assigned_to:l.assignedTo, assign_status:l.assignStatus,
+    created_date:l.createdDate, stage_entered_date:l.stageEnteredDate,
+    won_date:l.wonDate, follow_up_date:l.followUpDate,
+    last_contact_date:l.lastContactDate, expected_credit:l.expectedCredit,
+    credit_changes:l.creditChanges, remarks:l.remarks,
+    lost_reason:l.lostReason, disq_reason:l.disqReason,
+    proposal_viewed:l.proposalViewed, proposal_viewed_at:l.proposalViewedAt,
+    qual_checklist:l.qualChecklist, nps:l.nps,
+    notes:l.notes, tasks:l.tasks, history:l.history
+  };
+}
+
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
 function useW() {
   const [w,setW]=useState(typeof window!=="undefined"?window.innerWidth:1200);
@@ -1475,8 +1525,44 @@ export default function CRM(){
   const [role,setRole]=useState("admin");
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [leads,setLeads]=useState(INIT_LEADS);
+  const [leadsLoading,setLeadsLoading]=useState(true);
+  const [leadsError,setLeadsError]=useState(null);
   const [selectedLead,setSelectedLead]=useState(null);
   const [notifOpen,setNotifOpen]=useState(false);
+
+  /* ── LOAD LEADS FROM API ── */
+  useEffect(()=>{
+    setLeadsLoading(true);
+    apiFetch("/leads")
+      .then(data=>{setLeads(data.map(mapLead));setLeadsError(null);})
+      .catch(err=>{console.warn("API unavailable, using local data:",err.message);setLeadsError(err.message);})
+      .finally(()=>setLeadsLoading(false));
+  },[]);
+
+  /* ── SAVE LEAD TO API ── */
+  async function saveLead(updated){
+    setLeads(prev=>prev.map(l=>l.id===updated.id?updated:l));
+    try{ await apiFetch("/leads/"+updated.id,{method:"PUT",body:JSON.stringify(unmapLead(updated))}); }
+    catch(e){ console.warn("Save failed:",e.message); }
+  }
+
+  /* ── ADD LEAD TO API ── */
+  async function addLead(newLead){
+    try{
+      const saved=await apiFetch("/leads",{method:"POST",body:JSON.stringify(unmapLead(newLead))});
+      setLeads(prev=>[mapLead(saved),...prev]);
+    }catch(e){
+      console.warn("Add lead API failed, adding locally:",e.message);
+      setLeads(prev=>[newLead,...prev]);
+    }
+  }
+
+  /* ── DELETE LEAD FROM API ── */
+  async function deleteLead(id){
+    setLeads(prev=>prev.filter(l=>l.id!==id));
+    try{ await apiFetch("/leads/"+id,{method:"DELETE"}); }
+    catch(e){ console.warn("Delete failed:",e.message); }
+  }
 
   const fp=ROLES[role];
   const allowed=fp.pages||[];
@@ -1572,6 +1658,9 @@ export default function CRM(){
           </div>
         </div>
 
+        {leadsLoading&&<div style={{padding:"8px 18px",background:`${C.amber}15`,borderBottom:`1px solid ${C.amber}33`,fontSize:11,color:C.amber,display:"flex",alignItems:"center",gap:8,flexShrink:0}}><span style={{animation:"pulse 1s infinite"}}>⏳</span> Loading leads from database...</div>}
+        {!leadsLoading&&leadsError&&<div style={{padding:"8px 18px",background:`${C.red}15`,borderBottom:`1px solid ${C.red}33`,fontSize:11,color:C.red,flexShrink:0}}>⚠️ Database unavailable — showing local data.</div>}
+        {!leadsLoading&&!leadsError&&<div style={{padding:"6px 18px",background:`${C.green}10`,borderBottom:`1px solid ${C.green}22`,fontSize:10,color:C.green,flexShrink:0}}>✅ Live — {leads.length} leads from Supabase</div>}
         {/* Content */}
         <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
           {tab==="dashboard"    &&<Dashboard     leads={leads} role={role} isMobile={isMobile}/>}
