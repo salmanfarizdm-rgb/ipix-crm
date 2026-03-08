@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import React, { useState, useEffect } from "react";
-=======
-import React, { useState, useEffect } from "react";
->>>>>>> 07dbd68 (fix: update App.js)
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
@@ -701,10 +696,6 @@ function BulkImportModal({leads,setLeads,role,onClose}){
   const [activeTab,setActiveTab]=useState("photo"); // photo | excel | csv
   const [parsed,setParsed]=useState([]);
   const [dupes,setDupes]=useState([]);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 07dbd68 (fix: update App.js)
   const [aiLoading,setAiLoading]=useState(false);
   const [aiError,setAiError]=useState("");
   const [imgPreview,setImgPreview]=useState(null);
@@ -740,15 +731,6 @@ function BulkImportModal({leads,setLeads,role,onClose}){
   const finaliseParsed=(rows)=>{
     const results=rows.map((r,i)=>buildLead(r,i)).filter(r=>r.company||r.contact||r.phone);
     const d=results.filter(r=>leads.some(l=>(l.phone&&l.phone===r.phone)||(l.email&&r.email&&l.email===r.email)));
-<<<<<<< HEAD
-=======
-  const parse=()=>{
-    const rows=csvText.trim().split("\n").slice(1);
-    const results=rows.map((r,idx)=>{const cols=r.split(",");return{id:`IMP${Date.now()}${idx}`,company:cols[0]?.trim()||"",contact:cols[1]?.trim()||"",phone:cols[2]?.trim()||"",email:cols[3]?.trim()||"",source:cols[4]?.trim()||"Google Ads",service:cols[5]?.trim()||"",dealValue:Number(cols[6])||0,score:"Cold",status:"New",assignedTo:"",assignStatus:"unassigned",createdDate:TODAY,stageEnteredDate:TODAY,wonDate:null,followUpDate:"—",lastContactDate:"",expectedCredit:"",creditChanges:[],remarks:"",lostReason:"",disqReason:"",proposalViewed:false,proposalViewedAt:null,budgetConfirmed:false,timelineConfirmed:false,qualChecklist:{budget:false,decisionMaker:false,requirement:false,timeline:false},nps:null,notes:[],tasks:[],history:[{action:"Lead Imported via CSV",by:fp.label,date:TODAY,time:"Now"}]};});
-    const d=results.filter(r=>leads.some(l=>(l.phone&&l.phone===r.phone)||(l.email&&l.email===r.email)));
->>>>>>> a6b3707 (new changes)
-=======
->>>>>>> 07dbd68 (fix: update App.js)
     setDupes(d.map(r=>r.id));
     setParsed(results);
   };
