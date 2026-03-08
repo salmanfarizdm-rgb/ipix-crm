@@ -2,9 +2,6 @@
 <<<<<<< HEAD
 import React, { useState, useEffect } from "react";
 =======
-import { useState, useEffect } from "react";
->>>>>>> a6b3707 (new changes)
-=======
 import React, { useState, useEffect } from "react";
 >>>>>>> 07dbd68 (fix: update App.js)
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
