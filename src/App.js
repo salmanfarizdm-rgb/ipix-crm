@@ -1,146 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-/* ── API ─────────────────────────────────────────────────────────────── */
-const API="https://ipix-backend-production.up.railway.app/api";
-
-/* ── AUTH HELPERS ────────────────────────────────────────────────────── */
-function getToken(){ return localStorage.getItem("ipix_token")||null; }
-function getUser(){ try{ return JSON.parse(localStorage.getItem("ipix_user")||"null"); }catch{ return null; } }
-function saveSession(token,user){ localStorage.setItem("ipix_token",token); localStorage.setItem("ipix_user",JSON.stringify(user)); }
-function clearSession(){ localStorage.removeItem("ipix_token"); localStorage.removeItem("ipix_user"); }
-
-async function apiFetch(path,opts={}){
-  const token=getToken();
-  const headers={"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{})};
-  const res=await fetch(API+path,{headers,...opts});
-  const json=await res.json();
-  if(!json.success)throw new Error(json.error||"API error");
-  return json.data;
-}
-
-/* ── LOGIN SCREEN ────────────────────────────────────────────────────── */
-function LoginScreen({onLogin}){
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState("");
-  const [showPass,setShowPass]=useState(false);
-
-  const login=async(e)=>{
-    e.preventDefault();
-    if(!email||!password){setError("Enter email and password");return;}
-    setLoading(true);setError("");
-    try{
-      const res=await fetch(API+"/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
-      const data=await res.json();
-      if(!data.success)throw new Error(data.error||"Login failed");
-      saveSession(data.token,data.user);
-      onLogin(data.user);
-    }catch(err){
-      setError(err.message||"Invalid email or password");
-    }finally{
-      setLoading(false);
-    }
-  };
-
-  return(
-    <div style={{minHeight:"100vh",background:"#05080F",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'DM Sans','Segoe UI',sans-serif",padding:20}}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;}`}</style>
-      <div style={{width:"100%",maxWidth:400}}>
-        {/* Logo */}
-        <div style={{textAlign:"center",marginBottom:32}}>
-          <div style={{fontSize:32,fontWeight:800,color:"#0EA5E9",letterSpacing:"-1px"}}>◈ NexCRM</div>
-          <div style={{fontSize:11,color:"#7B95BA",letterSpacing:3,textTransform:"uppercase",marginTop:4}}>IPIX Technologies</div>
-        </div>
-        {/* Card */}
-        <div style={{background:"#0A1220",border:"1px solid #182847",borderRadius:16,padding:32}}>
-          <div style={{fontSize:20,fontWeight:700,color:"#EEF4FF",marginBottom:4}}>Welcome back</div>
-          <div style={{fontSize:13,color:"#7B95BA",marginBottom:24}}>Sign in to your account</div>
-          <form onSubmit={login}>
-            {/* Email */}
-            <div style={{marginBottom:16}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#7B95BA",textTransform:"uppercase",letterSpacing:0.8,marginBottom:6}}>Email</div>
-              <input
-                type="email" value={email} onChange={e=>{setEmail(e.target.value);setError("");}}
-                placeholder="you@ipixtechnologies.com" autoFocus
-                style={{width:"100%",background:"#0F1A2E",border:`1px solid ${error?"#EF4444":"#182847"}`,borderRadius:8,color:"#EEF4FF",padding:"10px 12px",fontSize:13,outline:"none"}}
-              />
-            </div>
-            {/* Password */}
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#7B95BA",textTransform:"uppercase",letterSpacing:0.8,marginBottom:6}}>Password</div>
-              <div style={{position:"relative"}}>
-                <input
-                  type={showPass?"text":"password"} value={password} onChange={e=>{setPassword(e.target.value);setError("");}}
-                  placeholder="••••••••"
-                  style={{width:"100%",background:"#0F1A2E",border:`1px solid ${error?"#EF4444":"#182847"}`,borderRadius:8,color:"#EEF4FF",padding:"10px 36px 10px 12px",fontSize:13,outline:"none"}}
-                />
-                <button type="button" onClick={()=>setShowPass(p=>!p)} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#7B95BA",fontSize:14}}>
-                  {showPass?"🙈":"👁"}
-                </button>
-              </div>
-            </div>
-            {/* Error */}
-            {error&&<div style={{background:"#EF444415",border:"1px solid #EF444433",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#EF4444",marginBottom:16}}>⚠️ {error}</div>}
-            {/* Submit */}
-            <button type="submit" disabled={loading} style={{width:"100%",background:loading?"#0369a1":"#0EA5E9",color:"#fff",border:"none",borderRadius:8,padding:"11px",fontSize:13,fontWeight:700,cursor:loading?"not-allowed":"pointer",transition:"background 0.15s"}}>
-              {loading?"Signing in...":"Sign In →"}
-            </button>
-          </form>
-          <div style={{marginTop:16,fontSize:11,color:"#7B95BA",textAlign:"center"}}>
-            Forgot password? Contact your admin
-          </div>
-        </div>
-        <div style={{textAlign:"center",marginTop:20,fontSize:11,color:"#162035"}}>
-          IPIX Technologies CRM · Confidential
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── MAP API LEAD → APP LEAD ─────────────────────────────────────────── */
-function mapLead(l){
-  return{
-    id:l.id, company:l.company||"", contact:l.contact||"", phone:l.phone||"",
-    backupPhone:l.backup_phone||"", email:l.email||"", backupEmail:l.backup_email||"",
-    role:l.role||"", location:l.location||"", source:l.source||"Google Ads",
-    campaign:l.campaign||"—", adGroup:l.ad_group||"—", score:l.score||"Cold",
-    status:l.status||"New", service:l.service||"", dealValue:l.deal_value||0,
-    budgetConfirmed:l.budget_confirmed||false, timelineConfirmed:l.timeline_confirmed||false,
-    assignedTo:l.assigned_to||"", assignStatus:l.assign_status||"unassigned",
-    createdDate:l.created_date||"", stageEnteredDate:l.stage_entered_date||"",
-    wonDate:l.won_date||null, followUpDate:l.follow_up_date||"—",
-    lastContactDate:l.last_contact_date||"", expectedCredit:l.expected_credit||"",
-    creditChanges:l.credit_changes||[], remarks:l.remarks||"",
-    lostReason:l.lost_reason||"", disqReason:l.disq_reason||"",
-    proposalViewed:l.proposal_viewed||false, proposalViewedAt:l.proposal_viewed_at||null,
-    qualChecklist:l.qual_checklist||{budget:false,decisionMaker:false,requirement:false,timeline:false},
-    nps:l.nps||null, notes:l.notes||[], tasks:l.tasks||[], history:l.history||[]
-  };
-}
-
-/* ── MAP APP LEAD → API LEAD ─────────────────────────────────────────── */
-function unmapLead(l){
-  return{
-    company:l.company, contact:l.contact, phone:l.phone, backup_phone:l.backupPhone,
-    email:l.email, backup_email:l.backupEmail, role:l.role, location:l.location,
-    source:l.source, campaign:l.campaign, ad_group:l.adGroup, score:l.score,
-    status:l.status, service:l.service, deal_value:l.dealValue,
-    budget_confirmed:l.budgetConfirmed, timeline_confirmed:l.timelineConfirmed,
-    assigned_to:l.assignedTo, assign_status:l.assignStatus,
-    created_date:l.createdDate, stage_entered_date:l.stageEnteredDate,
-    won_date:l.wonDate, follow_up_date:l.followUpDate,
-    last_contact_date:l.lastContactDate, expected_credit:l.expectedCredit,
-    credit_changes:l.creditChanges, remarks:l.remarks,
-    lost_reason:l.lostReason, disq_reason:l.disqReason,
-    proposal_viewed:l.proposalViewed, proposal_viewed_at:l.proposalViewedAt,
-    qual_checklist:l.qualChecklist, nps:l.nps,
-    notes:l.notes, tasks:l.tasks, history:l.history
-  };
-}
-
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
 function useW() {
   const [w,setW]=useState(typeof window!=="undefined"?window.innerWidth:1200);
@@ -1612,72 +1472,11 @@ export default function CRM(){
   const w=useW();
   const isMobile=w<640;
   const [tab,setTab]=useState("dashboard");
+  const [role,setRole]=useState("admin");
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [leads,setLeads]=useState(INIT_LEADS);
-  const [leadsLoading,setLeadsLoading]=useState(true);
-  const [leadsError,setLeadsError]=useState(null);
   const [selectedLead,setSelectedLead]=useState(null);
   const [notifOpen,setNotifOpen]=useState(false);
-
-  /* ── AUTH STATE ── */
-  const [authUser,setAuthUser]=useState(()=>getUser());
-  const [authChecked,setAuthChecked]=useState(false);
-
-  // Map logged-in user to role key
-  const role = authUser?.role || "sales_exec";
-
-  // On mount — verify token still valid
-  useEffect(()=>{
-    const token=getToken();
-    const user=getUser();
-    if(!token||!user){ clearSession(); setAuthUser(null); setAuthChecked(true); return; }
-    fetch(API+"/auth/me",{headers:{Authorization:`Bearer ${token}`}})
-      .then(r=>r.json())
-      .then(d=>{ if(d.success){ setAuthUser(d.data); } else { clearSession(); setAuthUser(null); } })
-      .catch(()=>{ /* keep local session on network error */ })
-      .finally(()=>setAuthChecked(true));
-  },[]);
-
-  const handleLogin=(user)=>{ setAuthUser(user); };
-  const handleLogout=()=>{ clearSession(); setAuthUser(null); setTab("dashboard"); };
-
-  // Show login screen if not authenticated
-  if(!authChecked) return <div style={{minHeight:"100vh",background:"#05080F",display:"flex",alignItems:"center",justifyContent:"center",color:"#0EA5E9",fontFamily:"sans-serif",fontSize:14}}>Loading...</div>;
-  if(!authUser) return <LoginScreen onLogin={handleLogin}/>;
-
-  /* ── LOAD LEADS FROM API ── */
-  useEffect(()=>{
-    setLeadsLoading(true);
-    apiFetch("/leads")
-      .then(data=>{setLeads(data.map(mapLead));setLeadsError(null);})
-      .catch(err=>{console.warn("API unavailable, using local data:",err.message);setLeadsError(err.message);})
-      .finally(()=>setLeadsLoading(false));
-  },[]);
-
-  /* ── SAVE LEAD TO API ── */
-  async function saveLead(updated){
-    setLeads(prev=>prev.map(l=>l.id===updated.id?updated:l));
-    try{ await apiFetch("/leads/"+updated.id,{method:"PUT",body:JSON.stringify(unmapLead(updated))}); }
-    catch(e){ console.warn("Save failed:",e.message); }
-  }
-
-  /* ── ADD LEAD TO API ── */
-  async function addLead(newLead){
-    try{
-      const saved=await apiFetch("/leads",{method:"POST",body:JSON.stringify(unmapLead(newLead))});
-      setLeads(prev=>[mapLead(saved),...prev]);
-    }catch(e){
-      console.warn("Add lead API failed, adding locally:",e.message);
-      setLeads(prev=>[newLead,...prev]);
-    }
-  }
-
-  /* ── DELETE LEAD FROM API ── */
-  async function deleteLead(id){
-    setLeads(prev=>prev.filter(l=>l.id!==id));
-    try{ await apiFetch("/leads/"+id,{method:"DELETE"}); }
-    catch(e){ console.warn("Delete failed:",e.message); }
-  }
 
   const fp=ROLES[role];
   const allowed=fp.pages||[];
@@ -1712,16 +1511,11 @@ export default function CRM(){
         ))}
       </div>
       <div style={{padding:"12px 16px",borderTop:`1px solid ${C.border}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-          <div style={{width:32,height:32,borderRadius:"50%",background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"#fff",flexShrink:0}}>{fp.short}</div>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:12,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{authUser?.name||"User"}</div>
-            <div style={{fontSize:10,color:fp.color,fontWeight:600}}>{fp.label}</div>
-          </div>
-        </div>
-        <button onClick={handleLogout} style={{width:"100%",background:"#EF444415",border:"1px solid #EF444433",borderRadius:7,color:"#EF4444",padding:"7px",fontSize:11,fontWeight:700,cursor:"pointer"}}>
-          Sign Out
-        </button>
+        <div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>Role (Demo)</div>
+        <select value={role} onChange={e=>setRole(e.target.value)} style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:fp.color,padding:"6px 8px",fontSize:11,outline:"none",width:"100%",fontWeight:700,cursor:"pointer"}}>
+          {Object.entries(ROLES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+        </select>
+        <div style={{fontSize:10,color:C.muted,marginTop:4}}>Changes nav & permissions live</div>
       </div>
     </div>
   );
@@ -1773,14 +1567,11 @@ export default function CRM(){
                 </div>
               )}
             </div>
-            <div style={{width:28,height:28,borderRadius:"50%",background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0}} title={authUser?.name||fp.label}>{fp.short}</div>
-            {!isMobile&&<span style={{fontSize:11,fontWeight:600,color:fp.color}}>{authUser?.name||fp.label}</span>}
+            <div style={{width:28,height:28,borderRadius:"50%",background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0}} title={fp.label}>{fp.short}</div>
+            {!isMobile&&<span style={{fontSize:11,fontWeight:600,color:fp.color}}>{fp.label}</span>}
           </div>
         </div>
 
-        {leadsLoading&&<div style={{padding:"8px 18px",background:`${C.amber}15`,borderBottom:`1px solid ${C.amber}33`,fontSize:11,color:C.amber,display:"flex",alignItems:"center",gap:8,flexShrink:0}}><span style={{animation:"pulse 1s infinite"}}>⏳</span> Loading leads from database...</div>}
-        {!leadsLoading&&leadsError&&<div style={{padding:"8px 18px",background:`${C.red}15`,borderBottom:`1px solid ${C.red}33`,fontSize:11,color:C.red,flexShrink:0}}>⚠️ Database unavailable — showing local data.</div>}
-        {!leadsLoading&&!leadsError&&<div style={{padding:"6px 18px",background:`${C.green}10`,borderBottom:`1px solid ${C.green}22`,fontSize:10,color:C.green,flexShrink:0}}>✅ Live — {leads.length} leads from Supabase</div>}
         {/* Content */}
         <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
           {tab==="dashboard"    &&<Dashboard     leads={leads} role={role} isMobile={isMobile}/>}
