@@ -1538,60 +1538,78 @@ export default function CRM(){
     </div>
   );
 
+  const NotifItem=({icon,msg,c})=>(<div style={{display:"flex",gap:9,alignItems:"flex-start",padding:"9px 11px",background:`${c}12`,border:`1px solid ${c}25`,borderRadius:10,marginBottom:6,fontSize:11,color:c,fontWeight:500,lineHeight:1.45}}><span style={{flexShrink:0}}>{icon}</span><span>{msg}</span></div>);
+
   return(
-    <div style={{display:"flex",height:"100vh",fontFamily:"'DM Sans','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
+    <div style={{display:"flex",height:"100vh",fontFamily:"'Plus Jakarta Sans','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
-        ::-webkit-scrollbar{width:4px;height:4px;}
-        ::-webkit-scrollbar-track{background:#0A1220;}
-        ::-webkit-scrollbar-thumb{background:#182847;border-radius:2px;}
-        select option{background:#0F1A2E;}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-        input[type=radio],input[type=checkbox]{cursor:pointer;}
+        body,button,select,input,textarea{font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;}
+        ::-webkit-scrollbar{width:5px;height:5px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:#1F3050;border-radius:4px;}
+        ::-webkit-scrollbar-thumb:hover{background:#2A4060;}
+        select option{background:#131F32;}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+        input[type=radio],input[type=checkbox]{cursor:pointer;accent-color:#4F9EFF;}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:#4F9EFF!important;box-shadow:0 0 0 3px rgba(79,158,255,0.12)!important;}
+        table tbody tr:hover td{background:rgba(31,48,80,0.35);}
+        .nav-item:hover{background:rgba(79,158,255,0.08)!important;color:#DFF0FF!important;}
       `}</style>
 
-      {!isMobile&&<div style={{width:215,minWidth:215,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
+      {!isMobile&&<div style={{width:224,minWidth:224,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
       {isMobile&&sidebarOpen&&(
         <div style={{position:"fixed",inset:0,zIndex:200,display:"flex"}}>
-          <div style={{width:230,background:C.surface,borderRight:`1px solid ${C.border}`}}><Sidebar/></div>
-          <div style={{flex:1,background:"rgba(0,0,0,0.55)"}} onClick={()=>setSidebarOpen(false)}/>
+          <div style={{width:240,background:C.surface,borderRight:`1px solid ${C.border}`}}><Sidebar/></div>
+          <div style={{flex:1,background:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)"}} onClick={()=>setSidebarOpen(false)}/>
         </div>
       )}
 
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",minWidth:0}}>
         {/* Topbar */}
-        <div style={{padding:isMobile?"10px 14px":"11px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:8,flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {isMobile&&<button style={{background:"none",border:"none",cursor:"pointer",color:C.text,fontSize:20,lineHeight:1}} onClick={()=>setSidebarOpen(true)}>☰</button>}
-            <div style={{fontSize:isMobile?13:15,fontWeight:700}}>{TITLES[tab]}</div>
+        <div style={{padding:isMobile?"10px 14px":"12px 22px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:10,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            {isMobile&&<button style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.text,fontSize:16,padding:"6px 9px",lineHeight:1}} onClick={()=>setSidebarOpen(true)}>☰</button>}
+            <div>
+              <div style={{fontSize:isMobile?14:16,fontWeight:800,letterSpacing:"-0.025em",color:C.text}}>{TITLES[tab]}</div>
+              {!isMobile&&<div style={{fontSize:10,color:C.muted,marginTop:1,letterSpacing:"0.04em"}}>IPIX Technologies · CRM</div>}
+            </div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            {!isMobile&&<input style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,padding:"6px 10px",fontSize:12,outline:"none",width:165}} placeholder="🔍 Global search..."/>}
+            {!isMobile&&(
+              <div style={{position:"relative"}}>
+                <input style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,color:C.text,padding:"8px 14px 8px 36px",fontSize:12,outline:"none",width:200}} placeholder="Search anything..."/>
+                <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.muted,fontSize:14,pointerEvents:"none"}}>⌕</span>
+              </div>
+            )}
             <div style={{position:"relative"}}>
-              <button style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.text,position:"relative",lineHeight:1}} onClick={()=>setNotifOpen(o=>!o)}>
-                🔔{totalAlerts>0&&<span style={{position:"absolute",top:-2,right:-2,background:C.red,color:"#fff",fontSize:9,fontWeight:700,borderRadius:"50%",width:14,height:14,display:"flex",alignItems:"center",justifyContent:"center"}}>{totalAlerts}</span>}
+              <button style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,cursor:"pointer",fontSize:16,color:C.text,padding:"8px 11px",lineHeight:1,display:"flex",alignItems:"center",position:"relative"}} onClick={()=>setNotifOpen(o=>!o)}>
+                🔔
+                {totalAlerts>0&&<span style={{position:"absolute",top:-5,right:-5,background:C.red,color:"#fff",fontSize:9,fontWeight:700,borderRadius:10,padding:"1px 5px",minWidth:16,textAlign:"center",boxShadow:`0 0 8px ${C.red}66`}}>{totalAlerts}</span>}
               </button>
               {notifOpen&&(
-                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:300,background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,padding:14,zIndex:100,boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
-                  <div style={{fontWeight:700,marginBottom:10,fontSize:13}}>Notifications</div>
-                  {pendingCount>0&&<div style={{padding:"8px 10px",background:`${C.amber}12`,borderRadius:8,fontSize:11,color:C.amber,marginBottom:6}}>⏳ {pendingCount} assignment(s) pending approval</div>}
-                  {slaCount>0&&<div style={{padding:"8px 10px",background:`${C.red}12`,borderRadius:8,fontSize:11,color:C.red,marginBottom:6}}>🚨 {slaCount} SLA breach(es) — 2-hour rule</div>}
-                  {agingCount>0&&<div style={{padding:"8px 10px",background:`${C.orange}12`,borderRadius:8,fontSize:11,color:C.orange,marginBottom:6}}>⚠️ {agingCount} deal(s) over stage time limit</div>}
-                  {stuckCount>0&&<div style={{padding:"8px 10px",background:`${C.red}12`,borderRadius:8,fontSize:11,color:C.red,marginBottom:6}}>🔴 {stuckCount} deal(s) stuck — escalate to manager</div>}
-                  {todayFU>0&&<div style={{padding:"8px 10px",background:`${C.green}12`,borderRadius:8,fontSize:11,color:C.green,marginBottom:6}}>📞 {todayFU} follow-up(s) due today</div>}
-                  <div style={{padding:"8px 10px",background:`${C.amber}12`,borderRadius:8,fontSize:11,color:C.amber,marginBottom:6}}>🔔 TechNova AWS server renewal in 6 days</div>
-                  <div style={{padding:"8px 10px",background:`${C.purple}12`,borderRadius:8,fontSize:11,color:C.purple}}>📄 1 proposal not yet viewed by client</div>
+                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:310,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:16,zIndex:100,boxShadow:"0 20px 60px rgba(0,0,0,0.65)",animation:"slideDown 0.15s ease"}}>
+                  <div style={{fontWeight:800,marginBottom:12,fontSize:14,letterSpacing:"-0.01em",paddingBottom:10,borderBottom:`1px solid ${C.border}`}}>Alerts &amp; Notifications</div>
+                  {pendingCount>0&&<NotifItem icon="⏳" msg={`${pendingCount} assignment(s) pending approval`} c={C.amber}/>}
+                  {slaCount>0&&<NotifItem icon="🚨" msg={`${slaCount} SLA breach(es) — 2-hour rule`} c={C.red}/>}
+                  {agingCount>0&&<NotifItem icon="⚠️" msg={`${agingCount} deal(s) over stage time limit`} c={C.orange}/>}
+                  {stuckCount>0&&<NotifItem icon="🔴" msg={`${stuckCount} deal(s) stuck — escalate to manager`} c={C.red}/>}
+                  {todayFU>0&&<NotifItem icon="📞" msg={`${todayFU} follow-up(s) due today`} c={C.green}/>}
+                  <NotifItem icon="🔔" msg="TechNova AWS server renewal in 6 days" c={C.amber}/>
+                  <NotifItem icon="📄" msg="1 proposal not yet viewed by client" c={C.purple}/>
+                  {totalAlerts===0&&todayFU===0&&<div style={{textAlign:"center",color:C.muted,fontSize:12,padding:"8px 0"}}>All clear — no alerts</div>}
                 </div>
               )}
             </div>
-            <div style={{width:28,height:28,borderRadius:"50%",background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0}} title={fp.label}>{fp.short}</div>
-            {!isMobile&&<span style={{fontSize:11,fontWeight:600,color:fp.color}}>{fp.label}</span>}
+            <div style={{width:34,height:34,borderRadius:10,background:`linear-gradient(135deg,${fp.color},${fp.color}BB)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0,cursor:"pointer",boxShadow:`0 2px 10px ${fp.color}44`}} title={fp.label}>{fp.short}</div>
+            {!isMobile&&<span style={{fontSize:11.5,fontWeight:700,color:fp.color}}>{fp.label}</span>}
           </div>
         </div>
 
         {/* Content */}
-        <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
+        <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"16px 20px",display:"flex",flexDirection:"column",gap:14}}>
           {tab==="dashboard"    &&<Dashboard     leads={leads} role={role} isMobile={isMobile}/>}
           {tab==="leads"        &&<LeadsPage     leads={leads} setLeads={setLeads} role={role} isMobile={isMobile} onOpenLead={l=>{setSelectedLead(l);}}/>}
           {tab==="clients"      &&<ClientsPage   role={role} isMobile={isMobile}/>}
@@ -1607,12 +1625,12 @@ export default function CRM(){
 
         {/* Mobile bottom nav */}
         {isMobile&&(
-          <div style={{display:"flex",borderTop:`1px solid ${C.border}`,background:C.surface,flexShrink:0}}>
-            {[{id:"dashboard",icon:"⊞"},{id:"leads",icon:"◎"},{id:"clients",icon:"❖"},{id:"calendar",icon:"📅"},{id:"forecast",icon:"📈"}].filter(i=>allowed.includes(i.id)).map(item=>(
-              <button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,padding:"9px 4px",border:"none",background:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:tab===item.id?C.accent:C.muted,fontSize:17,position:"relative"}}>
-                {item.icon}
-                {item.id==="leads"&&pendingCount>0&&<span style={{position:"absolute",top:5,right:"calc(50% - 14px)",background:C.amber,color:"#000",fontSize:9,fontWeight:700,borderRadius:10,padding:"0 4px"}}>{pendingCount}</span>}
-                <span style={{fontSize:9,fontWeight:600}}>{item.id}</span>
+          <div style={{display:"flex",borderTop:`1px solid ${C.border}`,background:C.surface,flexShrink:0,paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
+            {[{id:"dashboard",icon:"⊞",label:"Home"},{id:"leads",icon:"◎",label:"Leads"},{id:"clients",icon:"❖",label:"Clients"},{id:"calendar",icon:"📅",label:"Calendar"},{id:"forecast",icon:"📈",label:"Forecast"}].filter(i=>allowed.includes(i.id)).map(item=>(
+              <button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",background:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,color:tab===item.id?C.accent:C.muted,position:"relative",transition:"color 0.12s"}}>
+                <span style={{fontSize:18,lineHeight:1}}>{item.icon}</span>
+                {item.id==="leads"&&pendingCount>0&&<span style={{position:"absolute",top:6,right:"calc(50% - 16px)",background:C.amber,color:"#1A0E00",fontSize:9,fontWeight:700,borderRadius:8,padding:"0 4px"}}>{pendingCount}</span>}
+                <span style={{fontSize:9.5,fontWeight:tab===item.id?700:500}}>{item.label}</span>
               </button>
             ))}
           </div>
