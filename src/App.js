@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 /* ── RESPONSIVE ──────────────────────────────────────────────────────── */
@@ -7,15 +7,15 @@ function useW() {
   useEffect(()=>{const h=()=>setW(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   return w;
 }
-const TODAY="2025-03-05";
+const TODAY="2026-03-14";
 
 /* ── PALETTE ─────────────────────────────────────────────────────────── */
 const C={
-  bg:"#080C18",surface:"#0E1626",card:"#131F32",card2:"#192840",
-  border:"#1F3050",accent:"#4F9EFF",green:"#34D399",red:"#F87171",
-  amber:"#FBB047",purple:"#A78BFA",teal:"#2DD4BF",pink:"#F472B6",
-  orange:"#FB923C",indigo:"#818CF8",cyan:"#22D3EE",lime:"#86EFAC",
-  text:"#DFF0FF",muted:"#5A7A9A",faint:"#0E1626",
+  bg:"#0A0A0E",surface:"#111117",card:"#18181F",card2:"#1F1F28",
+  border:"#2A2A36",accent:"#C9A84C",green:"#3ECF8E",red:"#F06565",
+  amber:"#E8A230",purple:"#9B7FD4",teal:"#2CC4C4",pink:"#E86D9A",
+  orange:"#E8823C",indigo:"#7B82D4",cyan:"#22C4E8",lime:"#7ED49E",
+  text:"#F0EDE8",muted:"#6A6A78",faint:"#111117",
 };
 
 /* ── ROLES ───────────────────────────────────────────────────────────── */
@@ -241,17 +241,17 @@ const BROCHURES=[
 /* ── ATOMS ───────────────────────────────────────────────────────────── */
 const Badge=({label,color,size="sm"})=>(<span style={{display:"inline-flex",alignItems:"center",padding:size==="lg"?"4px 12px":"3px 9px",borderRadius:6,fontSize:size==="lg"?11:10,fontWeight:600,background:`${color||C.accent}1A`,color:color||C.accent,border:`1px solid ${color||C.accent}35`,whiteSpace:"nowrap",letterSpacing:"0.03em"}}>{label}</span>);
 const Dot=({color})=>(<span style={{width:7,height:7,borderRadius:"50%",background:color,display:"inline-block",marginRight:5,flexShrink:0,boxShadow:`0 0 6px ${color}66`}}/>);
-const Btn=({children,onClick,v="primary",sz="md",disabled,style={}})=>(<button onClick={onClick} disabled={disabled} style={{padding:sz==="sm"?"5px 12px":sz==="lg"?"11px 24px":"7px 16px",borderRadius:8,border:v==="ghost"?`1px solid ${C.border}`:"none",cursor:disabled?"not-allowed":"pointer",fontSize:sz==="sm"?11:12,fontWeight:600,background:disabled?"#172035":v==="ghost"?"transparent":v==="danger"?`${C.red}20`:v==="success"?C.green:v==="warn"?C.amber:v==="purple"?C.purple:v==="teal"?C.teal:C.accent,color:disabled?C.muted:v==="ghost"?C.muted:v==="danger"?C.red:v==="success"?"#022820":"#fff",opacity:disabled?0.55:1,whiteSpace:"nowrap",letterSpacing:"0.01em",transition:"opacity 0.15s",...style}}>{children}</button>);
-const Card=({title,action,children,style={}})=>(<div style={{background:C.card,borderRadius:14,border:`1px solid ${C.border}`,overflow:"hidden",...style}}>{title&&<div style={{padding:"13px 18px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap",background:`linear-gradient(to right,${C.card2}CC,${C.card})`}}><span style={{fontSize:13,fontWeight:700,letterSpacing:"-0.01em"}}>{title}</span>{action}</div>}<div style={{padding:16}}>{children}</div></div>);
+const Btn=({children,onClick,v="primary",sz="md",disabled,style={}})=>(<button onClick={onClick} disabled={disabled} style={{padding:sz==="sm"?"5px 12px":sz==="lg"?"11px 24px":"7px 16px",borderRadius:8,border:v==="ghost"?`1px solid ${C.border}`:"none",cursor:disabled?"not-allowed":"pointer",fontSize:sz==="sm"?11:12,fontWeight:600,background:disabled?"#1A1A22":v==="ghost"?"transparent":v==="danger"?`${C.red}20`:v==="success"?C.green:v==="warn"?C.amber:v==="purple"?C.purple:v==="teal"?C.teal:C.accent,color:disabled?C.muted:v==="ghost"?C.muted:v==="danger"?C.red:v==="success"?"#011A0E":v==="primary"?"#0A0A0E":"#fff",opacity:disabled?0.55:1,whiteSpace:"nowrap",letterSpacing:"0.01em",transition:"opacity 0.15s",...style}}>{children}</button>);
+const Card=({title,action,children,style={}})=>(<div style={{background:C.card,borderRadius:14,border:`1px solid ${C.border}`,overflow:"hidden",...style}}>{title&&<div style={{padding:"13px 18px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap",background:`linear-gradient(to right,${C.card2}CC,${C.card})`}}><span style={{fontSize:13,fontWeight:700,letterSpacing:"-0.01em",borderLeft:`3px solid ${C.accent}`,paddingLeft:10}}>{title}</span>{action}</div>}<div style={{padding:16}}>{children}</div></div>);
 const TH=({ch})=>(<th style={{textAlign:"left",padding:"10px 13px",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em",borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap",background:C.card2}}>{ch}</th>);
 const TD=({children,style={}})=>(<td style={{padding:"11px 13px",fontSize:12.5,borderBottom:`1px solid ${C.border}55`,verticalAlign:"middle",...style}}>{children}</td>);
 const FI=({label,k,f,s,type="text",ph="",req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:5}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.07em"}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<input type={type} value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} placeholder={ph} style={{background:C.card2,border:`1.5px solid ${errs[k]?C.red:C.border}`,borderRadius:8,color:C.text,padding:"9px 12px",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box",transition:"border-color 0.15s"}}/>{errs[k]&&<span style={{fontSize:11,color:C.red,marginTop:1}}>{errs[k]}</span>}</div>);
 const FS=({label,k,f,s,opts,req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:5}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.07em"}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<select value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} style={{background:C.card2,border:`1.5px solid ${errs[k]?C.red:C.border}`,borderRadius:8,color:C.text,padding:"9px 12px",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>{errs[k]&&<span style={{fontSize:11,color:C.red,marginTop:1}}>{errs[k]}</span>}</div>);
 const Sfilter=({value,onChange,opts})=>(<select value={value} onChange={e=>onChange(e.target.value)} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,padding:"7px 12px",fontSize:12,outline:"none",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>);
-const KPI=({label,value,sub,color,onClick})=>(<div onClick={onClick} style={{background:`linear-gradient(140deg,${C.card} 0%,${C.card2} 100%)`,borderRadius:14,padding:"16px 18px",border:`1px solid ${C.border}`,borderTop:`3px solid ${color||C.accent}`,cursor:onClick?"pointer":"default",position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:-16,right:-16,width:64,height:64,background:`${color||C.accent}0C`,borderRadius:"50%"}}/>  <div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.09em"}}>{label}</div><div style={{fontSize:22,fontWeight:800,color:C.text,marginTop:6,letterSpacing:"-0.03em"}}>{value}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:3,fontWeight:500}}>{sub}</div>}</div>);
+const KPI=({label,value,sub,color,onClick})=>(<div onClick={onClick} style={{background:`linear-gradient(140deg,${C.card} 0%,${C.card2} 100%)`,borderRadius:14,padding:"16px 18px",border:`1px solid ${C.border}`,borderTop:`3px solid ${color||C.accent}`,cursor:onClick?"pointer":"default",position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:-16,right:-16,width:64,height:64,background:`${color||C.accent}0C`,borderRadius:"50%"}}/><div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.09em"}}>{label}</div><div style={{fontSize:24,fontWeight:800,color:C.text,marginTop:6,letterSpacing:"-0.03em",fontVariantNumeric:"tabular-nums"}}>{value}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:3,fontWeight:500}}>{sub}</div>}</div>);
 const Fbar=({children})=>(<div style={{display:"flex",gap:10,flexWrap:"wrap",padding:"12px 16px",background:C.card,borderRadius:14,border:`1px solid ${C.border}`,alignItems:"center"}}>{children}</div>);
-const Modal=({title,onClose,children,mw=720})=>(<div style={{position:"fixed",inset:0,background:"rgba(4,8,18,0.88)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:12}} onClick={onClose}><div style={{background:`linear-gradient(150deg,${C.surface},${C.card})`,border:`1px solid ${C.border}`,borderRadius:18,width:"100%",maxWidth:mw,maxHeight:"92vh",overflowY:"auto",padding:24,boxShadow:"0 32px 80px rgba(0,0,0,0.7)"}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,paddingBottom:14,borderBottom:`1px solid ${C.border}`}}><span style={{fontSize:16,fontWeight:800,letterSpacing:"-0.02em"}}>{title}</span><button onClick={onClose} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:13,padding:"5px 11px",lineHeight:1}}>✕</button></div>{children}</div></div>);
-const Hlog=({entries})=>(<div style={{display:"flex",flexDirection:"column",gap:6}}>{entries.map((h,i)=>(<div key={i} style={{display:"flex",gap:12,padding:"10px 14px",background:`${C.card2}99`,borderRadius:10,border:`1px solid ${C.border}55`}}><div style={{width:3,background:C.accent,borderRadius:2,alignSelf:"stretch",flexShrink:0}}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,fontSize:12.5}}>{h.action}</div>{h.reason&&<div style={{fontSize:11,color:C.amber,marginTop:2}}>Reason: {h.reason}</div>}<div style={{fontSize:10.5,color:C.muted,marginTop:3}}>By {h.by} · {h.date} {h.time}</div></div></div>))}</div>);
+const Modal=({title,onClose,children,mw=720})=>(<div style={{position:"fixed",inset:0,background:"rgba(2,2,6,0.9)",backdropFilter:"blur(10px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:12}} onClick={onClose}><div style={{background:`linear-gradient(150deg,${C.surface},${C.card})`,border:`1px solid ${C.border}`,borderRadius:18,width:"100%",maxWidth:mw,maxHeight:"92vh",overflowY:"auto",padding:24,boxShadow:`0 40px 100px rgba(0,0,0,0.85),0 0 0 1px ${C.accent}18`}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,paddingBottom:14,borderBottom:`1px solid ${C.border}`}}><span style={{fontSize:16,fontWeight:800,letterSpacing:"-0.02em",borderLeft:`3px solid ${C.accent}`,paddingLeft:10}}>{title}</span><button onClick={onClose} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:13,padding:"5px 11px",lineHeight:1}}>✕</button></div>{children}</div></div>);
+const Hlog=({entries})=>(<div style={{display:"flex",flexDirection:"column",gap:6}}>{entries.map((h,i)=>(<div key={i} style={{display:"flex",gap:12,padding:"10px 14px",background:`${C.card2}99`,borderRadius:10,border:`1px solid ${C.border}55`}}><div style={{width:3,background:C.accent,borderRadius:2,alignSelf:"stretch",flexShrink:0,boxShadow:`0 0 6px ${C.accent}60`}}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,fontSize:12.5}}>{h.action}</div>{h.reason&&<div style={{fontSize:11,color:C.amber,marginTop:2}}>Reason: {h.reason}</div>}<div style={{fontSize:10.5,color:C.muted,marginTop:3}}>By {h.by} · {h.date} {h.time}</div></div></div>))}</div>);
 
 /* ── QUAL CHECKLIST ──────────────────────────────────────────────────── */
 function QualChecklist({lead,setLeads,role,onClose}){
@@ -1547,9 +1547,9 @@ export default function CRM(){
       {/* Logo */}
       <div style={{padding:"20px 18px 16px",borderBottom:`1px solid ${C.border}`}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:34,height:34,borderRadius:10,background:`linear-gradient(135deg,${C.accent},${C.purple})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,boxShadow:`0 4px 14px ${C.accent}40`}}>◈</div>
+          <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.accent},#8B6820)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,boxShadow:`0 4px 16px ${C.accent}45`}}>◈</div>
           <div>
-            <div style={{fontSize:15,fontWeight:800,letterSpacing:"-0.03em",color:C.text}}>NexCRM</div>
+            <div style={{fontSize:16,fontWeight:700,letterSpacing:"-0.01em",background:`linear-gradient(135deg,${C.accent} 0%,#F0D080 100%)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontFamily:"'Playfair Display',Georgia,serif"}}>NexCRM</div>
             <div style={{fontSize:9,color:C.muted,letterSpacing:"0.12em",textTransform:"uppercase",marginTop:1}}>IPIX Technologies</div>
           </div>
         </div>
@@ -1562,9 +1562,9 @@ export default function CRM(){
             {g.items.filter(i=>allowed.includes(i.id)).map(item=>{
               const isActive=tab===item.id;
               return(
-                <div key={item.id} onClick={()=>{setTab(item.id);setSidebarOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,margin:"1px 0",cursor:"pointer",fontSize:12.5,fontWeight:isActive?600:400,background:isActive?`${C.accent}18`:"transparent",color:isActive?C.accent:C.muted,position:"relative",transition:"all 0.12s"}}>
-                  {isActive&&<div style={{position:"absolute",left:0,top:"18%",bottom:"18%",width:3,background:C.accent,borderRadius:"0 3px 3px 0",boxShadow:`0 0 8px ${C.accent}99`}}/>}
-                  <span style={{fontSize:14,flexShrink:0,opacity:isActive?1:0.65}}>{item.icon}</span>
+                <div key={item.id} onClick={()=>{setTab(item.id);setSidebarOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,margin:"1px 0",cursor:"pointer",fontSize:12.5,fontWeight:isActive?600:400,background:isActive?`${C.accent}15`:"transparent",color:isActive?C.accent:C.muted,position:"relative",transition:"all 0.12s"}}>
+                  {isActive&&<div style={{position:"absolute",left:0,top:"18%",bottom:"18%",width:3,background:C.accent,borderRadius:"0 3px 3px 0",boxShadow:`0 0 8px ${C.accent}80`}}/>}
+                  <span style={{fontSize:14,flexShrink:0,opacity:isActive?1:0.6}}>{item.icon}</span>
                   <span style={{flex:1}}>{item.label}</span>
                   {item.id==="leads"&&pendingCount>0&&<span style={{background:C.amber,color:"#1A0E00",fontSize:9,fontWeight:700,borderRadius:6,padding:"2px 7px",minWidth:18,textAlign:"center"}}>{pendingCount}</span>}
                   {item.id==="calendar"&&todayFU>0&&<span style={{background:C.green,color:"#001A0E",fontSize:9,fontWeight:700,borderRadius:6,padding:"2px 7px",minWidth:18,textAlign:"center"}}>{todayFU}</span>}
@@ -1586,7 +1586,10 @@ export default function CRM(){
         <select value={role} onChange={e=>setRole(e.target.value)} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,color:fp.color,padding:"7px 10px",fontSize:11,outline:"none",width:"100%",fontWeight:700,cursor:"pointer"}}>
           {Object.entries(ROLES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
         </select>
-        <div style={{fontSize:9.5,color:C.muted,marginTop:5,letterSpacing:"0.02em"}}>Changes nav &amp; permissions live</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10,paddingTop:8,borderTop:`1px solid ${C.border}44`}}>
+          <span style={{fontSize:9,color:`${C.muted}99`,letterSpacing:"0.04em"}}>v2.1.0 · NexCRM Pro</span>
+          <span style={{fontSize:9,color:C.accent,cursor:"pointer",letterSpacing:"0.04em"}}>Help &amp; Support</span>
+        </div>
       </div>
     </div>
   );
