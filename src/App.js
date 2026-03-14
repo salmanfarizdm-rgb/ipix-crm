@@ -11,11 +11,11 @@ const TODAY="2025-03-05";
 
 /* ── PALETTE ─────────────────────────────────────────────────────────── */
 const C={
-  bg:"#05080F",surface:"#0A1220",card:"#0F1A2E",card2:"#131F35",
-  border:"#182847",accent:"#0EA5E9",green:"#10B981",red:"#EF4444",
-  amber:"#F59E0B",purple:"#8B5CF6",teal:"#14B8A6",pink:"#EC4899",
-  orange:"#F97316",indigo:"#6366F1",cyan:"#06B6D4",lime:"#84CC16",
-  text:"#EEF4FF",muted:"#7B95BA",faint:"#162035",
+  bg:"#080C18",surface:"#0E1626",card:"#131F32",card2:"#192840",
+  border:"#1F3050",accent:"#4F9EFF",green:"#34D399",red:"#F87171",
+  amber:"#FBB047",purple:"#A78BFA",teal:"#2DD4BF",pink:"#F472B6",
+  orange:"#FB923C",indigo:"#818CF8",cyan:"#22D3EE",lime:"#86EFAC",
+  text:"#DFF0FF",muted:"#5A7A9A",faint:"#0E1626",
 };
 
 /* ── ROLES ───────────────────────────────────────────────────────────── */
@@ -186,19 +186,19 @@ const BROCHURES=[
 ];
 
 /* ── ATOMS ───────────────────────────────────────────────────────────── */
-const Badge=({label,color,size="sm"})=>(<span style={{display:"inline-block",padding:size==="lg"?"3px 10px":"2px 8px",borderRadius:20,fontSize:size==="lg"?11:10,fontWeight:700,background:`${color||C.accent}22`,color:color||C.accent,border:`1px solid ${color||C.accent}44`,whiteSpace:"nowrap"}}>{label}</span>);
-const Dot=({color})=>(<span style={{width:7,height:7,borderRadius:"50%",background:color,display:"inline-block",marginRight:5,flexShrink:0}}/>);
-const Btn=({children,onClick,v="primary",sz="md",disabled,style={}})=>(<button onClick={onClick} disabled={disabled} style={{padding:sz==="sm"?"4px 10px":sz==="lg"?"10px 22px":"7px 14px",borderRadius:7,border:"none",cursor:disabled?"not-allowed":"pointer",fontSize:sz==="sm"?11:12,fontWeight:600,background:disabled?"#1A2D4A":v==="ghost"?"transparent":v==="danger"?`${C.red}22`:v==="success"?C.green:v==="warn"?C.amber:v==="purple"?C.purple:v==="teal"?C.teal:C.accent,color:disabled?C.muted:v==="ghost"?C.muted:v==="danger"?C.red:"#fff",opacity:disabled?0.6:1,whiteSpace:"nowrap",...style}}>{children}</button>);
-const Card=({title,action,children,style={}})=>(<div style={{background:C.card,borderRadius:12,border:`1px solid ${C.border}`,overflow:"hidden",...style}}>{title&&<div style={{padding:"11px 15px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap"}}><span style={{fontSize:13,fontWeight:700}}>{title}</span>{action}</div>}<div style={{padding:14}}>{children}</div></div>);
-const TH=({ch})=>(<th style={{textAlign:"left",padding:"7px 10px",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8,borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap"}}>{ch}</th>);
-const TD=({children,style={}})=>(<td style={{padding:"9px 10px",fontSize:12,borderBottom:`1px solid ${C.faint}`,verticalAlign:"middle",...style}}>{children}</td>);
-const FI=({label,k,f,s,type="text",ph="",req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:3}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<input type={type} value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} placeholder={ph} style={{background:C.faint,border:`1px solid ${errs[k]?C.red:C.border}`,borderRadius:7,color:C.text,padding:"7px 10px",fontSize:12,outline:"none",width:"100%",boxSizing:"border-box"}}/>{errs[k]&&<span style={{fontSize:10,color:C.red}}>{errs[k]}</span>}</div>);
-const FS=({label,k,f,s,opts,req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:3}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<select value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} style={{background:C.faint,border:`1px solid ${errs[k]?C.red:C.border}`,borderRadius:7,color:C.text,padding:"7px 10px",fontSize:12,outline:"none",width:"100%",boxSizing:"border-box",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>{errs[k]&&<span style={{fontSize:10,color:C.red}}>{errs[k]}</span>}</div>);
-const Sfilter=({value,onChange,opts})=>(<select value={value} onChange={e=>onChange(e.target.value)} style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,padding:"6px 10px",fontSize:12,outline:"none",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>);
-const KPI=({label,value,sub,color,onClick})=>(<div onClick={onClick} style={{background:C.card,borderRadius:12,padding:"12px 14px",border:`1px solid ${C.border}`,borderTop:`3px solid ${color||C.accent}`,cursor:onClick?"pointer":"default"}}><div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8}}>{label}</div><div style={{fontSize:19,fontWeight:800,color:color||C.text,marginTop:4}}>{value}</div>{sub&&<div style={{fontSize:10,color:C.muted,marginTop:3}}>{sub}</div>}</div>);
-const Fbar=({children})=>(<div style={{display:"flex",gap:8,flexWrap:"wrap",padding:"10px 14px",background:C.card,borderRadius:12,border:`1px solid ${C.border}`,alignItems:"center"}}>{children}</div>);
-const Modal=({title,onClose,children,mw=720})=>(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.82)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:12}} onClick={onClose}><div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,width:"100%",maxWidth:mw,maxHeight:"92vh",overflowY:"auto",padding:20}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><span style={{fontSize:15,fontWeight:800}}>{title}</span><Btn v="ghost" sz="sm" onClick={onClose}>✕</Btn></div>{children}</div></div>);
-const Hlog=({entries})=>(<div style={{display:"flex",flexDirection:"column",gap:6}}>{entries.map((h,i)=>(<div key={i} style={{display:"flex",gap:10,padding:"9px 12px",background:`${C.faint}99`,borderRadius:8}}><div style={{width:4,background:C.accent,borderRadius:2,alignSelf:"stretch",flexShrink:0}}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,fontSize:12}}>{h.action}</div>{h.reason&&<div style={{fontSize:11,color:C.amber,marginTop:1}}>Reason: {h.reason}</div>}<div style={{fontSize:10,color:C.muted,marginTop:2}}>By {h.by} · {h.date} {h.time}</div></div></div>))}</div>);
+const Badge=({label,color,size="sm"})=>(<span style={{display:"inline-flex",alignItems:"center",padding:size==="lg"?"4px 12px":"3px 9px",borderRadius:6,fontSize:size==="lg"?11:10,fontWeight:600,background:`${color||C.accent}1A`,color:color||C.accent,border:`1px solid ${color||C.accent}35`,whiteSpace:"nowrap",letterSpacing:"0.03em"}}>{label}</span>);
+const Dot=({color})=>(<span style={{width:7,height:7,borderRadius:"50%",background:color,display:"inline-block",marginRight:5,flexShrink:0,boxShadow:`0 0 6px ${color}66`}}/>);
+const Btn=({children,onClick,v="primary",sz="md",disabled,style={}})=>(<button onClick={onClick} disabled={disabled} style={{padding:sz==="sm"?"5px 12px":sz==="lg"?"11px 24px":"7px 16px",borderRadius:8,border:v==="ghost"?`1px solid ${C.border}`:"none",cursor:disabled?"not-allowed":"pointer",fontSize:sz==="sm"?11:12,fontWeight:600,background:disabled?"#172035":v==="ghost"?"transparent":v==="danger"?`${C.red}20`:v==="success"?C.green:v==="warn"?C.amber:v==="purple"?C.purple:v==="teal"?C.teal:C.accent,color:disabled?C.muted:v==="ghost"?C.muted:v==="danger"?C.red:v==="success"?"#022820":"#fff",opacity:disabled?0.55:1,whiteSpace:"nowrap",letterSpacing:"0.01em",transition:"opacity 0.15s",...style}}>{children}</button>);
+const Card=({title,action,children,style={}})=>(<div style={{background:C.card,borderRadius:14,border:`1px solid ${C.border}`,overflow:"hidden",...style}}>{title&&<div style={{padding:"13px 18px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,flexWrap:"wrap",background:`linear-gradient(to right,${C.card2}CC,${C.card})`}}><span style={{fontSize:13,fontWeight:700,letterSpacing:"-0.01em"}}>{title}</span>{action}</div>}<div style={{padding:16}}>{children}</div></div>);
+const TH=({ch})=>(<th style={{textAlign:"left",padding:"10px 13px",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em",borderBottom:`1px solid ${C.border}`,whiteSpace:"nowrap",background:C.card2}}>{ch}</th>);
+const TD=({children,style={}})=>(<td style={{padding:"11px 13px",fontSize:12.5,borderBottom:`1px solid ${C.border}55`,verticalAlign:"middle",...style}}>{children}</td>);
+const FI=({label,k,f,s,type="text",ph="",req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:5}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.07em"}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<input type={type} value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} placeholder={ph} style={{background:C.card2,border:`1.5px solid ${errs[k]?C.red:C.border}`,borderRadius:8,color:C.text,padding:"9px 12px",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box",transition:"border-color 0.15s"}}/>{errs[k]&&<span style={{fontSize:11,color:C.red,marginTop:1}}>{errs[k]}</span>}</div>);
+const FS=({label,k,f,s,opts,req,errs={}})=>(<div style={{display:"flex",flexDirection:"column",gap:5}}>{label&&<label style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.07em"}}>{label}{req&&<span style={{color:C.red,marginLeft:2}}>*</span>}</label>}<select value={f[k]||""} onChange={e=>s(x=>({...x,[k]:e.target.value}))} style={{background:C.card2,border:`1.5px solid ${errs[k]?C.red:C.border}`,borderRadius:8,color:C.text,padding:"9px 12px",fontSize:13,outline:"none",width:"100%",boxSizing:"border-box",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>{errs[k]&&<span style={{fontSize:11,color:C.red,marginTop:1}}>{errs[k]}</span>}</div>);
+const Sfilter=({value,onChange,opts})=>(<select value={value} onChange={e=>onChange(e.target.value)} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,padding:"7px 12px",fontSize:12,outline:"none",cursor:"pointer"}}>{opts.map(o=><option key={o.v!==undefined?o.v:o} value={o.v!==undefined?o.v:o}>{o.l||o}</option>)}</select>);
+const KPI=({label,value,sub,color,onClick})=>(<div onClick={onClick} style={{background:`linear-gradient(140deg,${C.card} 0%,${C.card2} 100%)`,borderRadius:14,padding:"16px 18px",border:`1px solid ${C.border}`,borderTop:`3px solid ${color||C.accent}`,cursor:onClick?"pointer":"default",position:"relative",overflow:"hidden"}}><div style={{position:"absolute",top:-16,right:-16,width:64,height:64,background:`${color||C.accent}0C`,borderRadius:"50%"}}/>  <div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.09em"}}>{label}</div><div style={{fontSize:22,fontWeight:800,color:C.text,marginTop:6,letterSpacing:"-0.03em"}}>{value}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:3,fontWeight:500}}>{sub}</div>}</div>);
+const Fbar=({children})=>(<div style={{display:"flex",gap:10,flexWrap:"wrap",padding:"12px 16px",background:C.card,borderRadius:14,border:`1px solid ${C.border}`,alignItems:"center"}}>{children}</div>);
+const Modal=({title,onClose,children,mw=720})=>(<div style={{position:"fixed",inset:0,background:"rgba(4,8,18,0.88)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:12}} onClick={onClose}><div style={{background:`linear-gradient(150deg,${C.surface},${C.card})`,border:`1px solid ${C.border}`,borderRadius:18,width:"100%",maxWidth:mw,maxHeight:"92vh",overflowY:"auto",padding:24,boxShadow:"0 32px 80px rgba(0,0,0,0.7)"}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20,paddingBottom:14,borderBottom:`1px solid ${C.border}`}}><span style={{fontSize:16,fontWeight:800,letterSpacing:"-0.02em"}}>{title}</span><button onClick={onClose} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:13,padding:"5px 11px",lineHeight:1}}>✕</button></div>{children}</div></div>);
+const Hlog=({entries})=>(<div style={{display:"flex",flexDirection:"column",gap:6}}>{entries.map((h,i)=>(<div key={i} style={{display:"flex",gap:12,padding:"10px 14px",background:`${C.card2}99`,borderRadius:10,border:`1px solid ${C.border}55`}}><div style={{width:3,background:C.accent,borderRadius:2,alignSelf:"stretch",flexShrink:0}}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,fontSize:12.5}}>{h.action}</div>{h.reason&&<div style={{fontSize:11,color:C.amber,marginTop:2}}>Reason: {h.reason}</div>}<div style={{fontSize:10.5,color:C.muted,marginTop:3}}>By {h.by} · {h.date} {h.time}</div></div></div>))}</div>);
 
 /* ── QUAL CHECKLIST ──────────────────────────────────────────────────── */
 function QualChecklist({lead,setLeads,role,onClose}){
@@ -1491,89 +1491,125 @@ export default function CRM(){
 
   const Sidebar=()=>(
     <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-      <div style={{padding:"18px 18px 14px",borderBottom:`1px solid ${C.border}`}}>
-        <div style={{fontSize:17,fontWeight:800,letterSpacing:"-0.5px",color:C.accent}}>◈ NexCRM</div>
-        <div style={{fontSize:9,color:C.muted,letterSpacing:2,textTransform:"uppercase",marginTop:2}}>IPIX Technologies</div>
+      {/* Logo */}
+      <div style={{padding:"20px 18px 16px",borderBottom:`1px solid ${C.border}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:34,height:34,borderRadius:10,background:`linear-gradient(135deg,${C.accent},${C.purple})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0,boxShadow:`0 4px 14px ${C.accent}40`}}>◈</div>
+          <div>
+            <div style={{fontSize:15,fontWeight:800,letterSpacing:"-0.03em",color:C.text}}>NexCRM</div>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:"0.12em",textTransform:"uppercase",marginTop:1}}>IPIX Technologies</div>
+          </div>
+        </div>
       </div>
-      <div style={{flex:1,overflowY:"auto",padding:"8px 0"}}>
+      {/* Navigation */}
+      <div style={{flex:1,overflowY:"auto",padding:"10px 10px"}}>
         {NAV_GROUPS.map(g=>(
-          <div key={g.sec}>
-            <div style={{padding:"10px 16px 4px",fontSize:9,fontWeight:700,color:C.muted,letterSpacing:2,textTransform:"uppercase"}}>{g.sec}</div>
-            {g.items.filter(i=>allowed.includes(i.id)).map(item=>(
-              <div key={item.id} onClick={()=>{setTab(item.id);setSidebarOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 16px",borderRadius:8,margin:"1px 8px",cursor:"pointer",fontSize:12,fontWeight:tab===item.id?600:400,background:tab===item.id?`${C.accent}18`:"transparent",color:tab===item.id?C.accent:C.muted,borderLeft:tab===item.id?`2px solid ${C.accent}`:"2px solid transparent",transition:"all 0.1s"}}>
-                <span style={{fontSize:13}}>{item.icon}</span>
-                <span>{item.label}</span>
-                {item.id==="leads"&&pendingCount>0&&<span style={{marginLeft:"auto",background:C.amber,color:"#000",fontSize:9,fontWeight:700,borderRadius:10,padding:"1px 6px"}}>{pendingCount}</span>}
-                {item.id==="calendar"&&todayFU>0&&<span style={{marginLeft:"auto",background:C.green,color:"#000",fontSize:9,fontWeight:700,borderRadius:10,padding:"1px 6px"}}>{todayFU}</span>}
-              </div>
-            ))}
+          <div key={g.sec} style={{marginBottom:6}}>
+            <div style={{padding:"10px 10px 5px",fontSize:9,fontWeight:700,color:C.muted,letterSpacing:"0.12em",textTransform:"uppercase"}}>{g.sec}</div>
+            {g.items.filter(i=>allowed.includes(i.id)).map(item=>{
+              const isActive=tab===item.id;
+              return(
+                <div key={item.id} onClick={()=>{setTab(item.id);setSidebarOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,margin:"1px 0",cursor:"pointer",fontSize:12.5,fontWeight:isActive?600:400,background:isActive?`${C.accent}18`:"transparent",color:isActive?C.accent:C.muted,position:"relative",transition:"all 0.12s"}}>
+                  {isActive&&<div style={{position:"absolute",left:0,top:"18%",bottom:"18%",width:3,background:C.accent,borderRadius:"0 3px 3px 0",boxShadow:`0 0 8px ${C.accent}99`}}/>}
+                  <span style={{fontSize:14,flexShrink:0,opacity:isActive?1:0.65}}>{item.icon}</span>
+                  <span style={{flex:1}}>{item.label}</span>
+                  {item.id==="leads"&&pendingCount>0&&<span style={{background:C.amber,color:"#1A0E00",fontSize:9,fontWeight:700,borderRadius:6,padding:"2px 7px",minWidth:18,textAlign:"center"}}>{pendingCount}</span>}
+                  {item.id==="calendar"&&todayFU>0&&<span style={{background:C.green,color:"#001A0E",fontSize:9,fontWeight:700,borderRadius:6,padding:"2px 7px",minWidth:18,textAlign:"center"}}>{todayFU}</span>}
+                </div>
+              );
+            })}
           </div>
         ))}
       </div>
-      <div style={{padding:"12px 16px",borderTop:`1px solid ${C.border}`}}>
-        <div style={{fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>Role (Demo)</div>
-        <select value={role} onChange={e=>setRole(e.target.value)} style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:fp.color,padding:"6px 8px",fontSize:11,outline:"none",width:"100%",fontWeight:700,cursor:"pointer"}}>
+      {/* Role switcher */}
+      <div style={{padding:"14px 16px",borderTop:`1px solid ${C.border}`,background:`${C.card2}60`}}>
+        <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:10}}>
+          <div style={{width:30,height:30,borderRadius:9,background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",flexShrink:0,boxShadow:`0 2px 8px ${fp.color}55`}}>{fp.short}</div>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:700,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{fp.label}</div>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:"0.06em"}}>ACTIVE ROLE</div>
+          </div>
+        </div>
+        <select value={role} onChange={e=>setRole(e.target.value)} style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,color:fp.color,padding:"7px 10px",fontSize:11,outline:"none",width:"100%",fontWeight:700,cursor:"pointer"}}>
           {Object.entries(ROLES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
         </select>
-        <div style={{fontSize:10,color:C.muted,marginTop:4}}>Changes nav & permissions live</div>
+        <div style={{fontSize:9.5,color:C.muted,marginTop:5,letterSpacing:"0.02em"}}>Changes nav &amp; permissions live</div>
       </div>
     </div>
   );
 
+  const NotifItem=({icon,msg,c})=>(<div style={{display:"flex",gap:9,alignItems:"flex-start",padding:"9px 11px",background:`${c}12`,border:`1px solid ${c}25`,borderRadius:10,marginBottom:6,fontSize:11,color:c,fontWeight:500,lineHeight:1.45}}><span style={{flexShrink:0}}>{icon}</span><span>{msg}</span></div>);
+
   return(
-    <div style={{display:"flex",height:"100vh",fontFamily:"'DM Sans','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
+    <div style={{display:"flex",height:"100vh",fontFamily:"'Plus Jakarta Sans','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
-        ::-webkit-scrollbar{width:4px;height:4px;}
-        ::-webkit-scrollbar-track{background:#0A1220;}
-        ::-webkit-scrollbar-thumb{background:#182847;border-radius:2px;}
-        select option{background:#0F1A2E;}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-        input[type=radio],input[type=checkbox]{cursor:pointer;}
+        body,button,select,input,textarea{font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;}
+        ::-webkit-scrollbar{width:5px;height:5px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:#1F3050;border-radius:4px;}
+        ::-webkit-scrollbar-thumb:hover{background:#2A4060;}
+        select option{background:#131F32;}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+        input[type=radio],input[type=checkbox]{cursor:pointer;accent-color:#4F9EFF;}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:#4F9EFF!important;box-shadow:0 0 0 3px rgba(79,158,255,0.12)!important;}
+        table tbody tr:hover td{background:rgba(31,48,80,0.35);}
+        .nav-item:hover{background:rgba(79,158,255,0.08)!important;color:#DFF0FF!important;}
       `}</style>
 
-      {!isMobile&&<div style={{width:215,minWidth:215,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
+      {!isMobile&&<div style={{width:224,minWidth:224,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
       {isMobile&&sidebarOpen&&(
         <div style={{position:"fixed",inset:0,zIndex:200,display:"flex"}}>
-          <div style={{width:230,background:C.surface,borderRight:`1px solid ${C.border}`}}><Sidebar/></div>
-          <div style={{flex:1,background:"rgba(0,0,0,0.55)"}} onClick={()=>setSidebarOpen(false)}/>
+          <div style={{width:240,background:C.surface,borderRight:`1px solid ${C.border}`}}><Sidebar/></div>
+          <div style={{flex:1,background:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)"}} onClick={()=>setSidebarOpen(false)}/>
         </div>
       )}
 
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",minWidth:0}}>
         {/* Topbar */}
-        <div style={{padding:isMobile?"10px 14px":"11px 20px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:8,flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            {isMobile&&<button style={{background:"none",border:"none",cursor:"pointer",color:C.text,fontSize:20,lineHeight:1}} onClick={()=>setSidebarOpen(true)}>☰</button>}
-            <div style={{fontSize:isMobile?13:15,fontWeight:700}}>{TITLES[tab]}</div>
+        <div style={{padding:isMobile?"10px 14px":"12px 22px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:10,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            {isMobile&&<button style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.text,fontSize:16,padding:"6px 9px",lineHeight:1}} onClick={()=>setSidebarOpen(true)}>☰</button>}
+            <div>
+              <div style={{fontSize:isMobile?14:16,fontWeight:800,letterSpacing:"-0.025em",color:C.text}}>{TITLES[tab]}</div>
+              {!isMobile&&<div style={{fontSize:10,color:C.muted,marginTop:1,letterSpacing:"0.04em"}}>IPIX Technologies · CRM</div>}
+            </div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            {!isMobile&&<input style={{background:C.faint,border:`1px solid ${C.border}`,borderRadius:7,color:C.text,padding:"6px 10px",fontSize:12,outline:"none",width:165}} placeholder="🔍 Global search..."/>}
+            {!isMobile&&(
+              <div style={{position:"relative"}}>
+                <input style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,color:C.text,padding:"8px 14px 8px 36px",fontSize:12,outline:"none",width:200}} placeholder="Search anything..."/>
+                <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.muted,fontSize:14,pointerEvents:"none"}}>⌕</span>
+              </div>
+            )}
             <div style={{position:"relative"}}>
-              <button style={{background:"none",border:"none",cursor:"pointer",fontSize:18,color:C.text,position:"relative",lineHeight:1}} onClick={()=>setNotifOpen(o=>!o)}>
-                🔔{totalAlerts>0&&<span style={{position:"absolute",top:-2,right:-2,background:C.red,color:"#fff",fontSize:9,fontWeight:700,borderRadius:"50%",width:14,height:14,display:"flex",alignItems:"center",justifyContent:"center"}}>{totalAlerts}</span>}
+              <button style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,cursor:"pointer",fontSize:16,color:C.text,padding:"8px 11px",lineHeight:1,display:"flex",alignItems:"center",position:"relative"}} onClick={()=>setNotifOpen(o=>!o)}>
+                🔔
+                {totalAlerts>0&&<span style={{position:"absolute",top:-5,right:-5,background:C.red,color:"#fff",fontSize:9,fontWeight:700,borderRadius:10,padding:"1px 5px",minWidth:16,textAlign:"center",boxShadow:`0 0 8px ${C.red}66`}}>{totalAlerts}</span>}
               </button>
               {notifOpen&&(
-                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:300,background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,padding:14,zIndex:100,boxShadow:"0 8px 32px rgba(0,0,0,0.5)"}}>
-                  <div style={{fontWeight:700,marginBottom:10,fontSize:13}}>Notifications</div>
-                  {pendingCount>0&&<div style={{padding:"8px 10px",background:`${C.amber}12`,borderRadius:8,fontSize:11,color:C.amber,marginBottom:6}}>⏳ {pendingCount} assignment(s) pending approval</div>}
-                  {slaCount>0&&<div style={{padding:"8px 10px",background:`${C.red}12`,borderRadius:8,fontSize:11,color:C.red,marginBottom:6}}>🚨 {slaCount} SLA breach(es) — 2-hour rule</div>}
-                  {agingCount>0&&<div style={{padding:"8px 10px",background:`${C.orange}12`,borderRadius:8,fontSize:11,color:C.orange,marginBottom:6}}>⚠️ {agingCount} deal(s) over stage time limit</div>}
-                  {stuckCount>0&&<div style={{padding:"8px 10px",background:`${C.red}12`,borderRadius:8,fontSize:11,color:C.red,marginBottom:6}}>🔴 {stuckCount} deal(s) stuck — escalate to manager</div>}
-                  {todayFU>0&&<div style={{padding:"8px 10px",background:`${C.green}12`,borderRadius:8,fontSize:11,color:C.green,marginBottom:6}}>📞 {todayFU} follow-up(s) due today</div>}
-                  <div style={{padding:"8px 10px",background:`${C.amber}12`,borderRadius:8,fontSize:11,color:C.amber,marginBottom:6}}>🔔 TechNova AWS server renewal in 6 days</div>
-                  <div style={{padding:"8px 10px",background:`${C.purple}12`,borderRadius:8,fontSize:11,color:C.purple}}>📄 1 proposal not yet viewed by client</div>
+                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:310,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:16,zIndex:100,boxShadow:"0 20px 60px rgba(0,0,0,0.65)",animation:"slideDown 0.15s ease"}}>
+                  <div style={{fontWeight:800,marginBottom:12,fontSize:14,letterSpacing:"-0.01em",paddingBottom:10,borderBottom:`1px solid ${C.border}`}}>Alerts &amp; Notifications</div>
+                  {pendingCount>0&&<NotifItem icon="⏳" msg={`${pendingCount} assignment(s) pending approval`} c={C.amber}/>}
+                  {slaCount>0&&<NotifItem icon="🚨" msg={`${slaCount} SLA breach(es) — 2-hour rule`} c={C.red}/>}
+                  {agingCount>0&&<NotifItem icon="⚠️" msg={`${agingCount} deal(s) over stage time limit`} c={C.orange}/>}
+                  {stuckCount>0&&<NotifItem icon="🔴" msg={`${stuckCount} deal(s) stuck — escalate to manager`} c={C.red}/>}
+                  {todayFU>0&&<NotifItem icon="📞" msg={`${todayFU} follow-up(s) due today`} c={C.green}/>}
+                  <NotifItem icon="🔔" msg="TechNova AWS server renewal in 6 days" c={C.amber}/>
+                  <NotifItem icon="📄" msg="1 proposal not yet viewed by client" c={C.purple}/>
+                  {totalAlerts===0&&todayFU===0&&<div style={{textAlign:"center",color:C.muted,fontSize:12,padding:"8px 0"}}>All clear — no alerts</div>}
                 </div>
               )}
             </div>
-            <div style={{width:28,height:28,borderRadius:"50%",background:fp.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0}} title={fp.label}>{fp.short}</div>
-            {!isMobile&&<span style={{fontSize:11,fontWeight:600,color:fp.color}}>{fp.label}</span>}
+            <div style={{width:34,height:34,borderRadius:10,background:`linear-gradient(135deg,${fp.color},${fp.color}BB)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0,cursor:"pointer",boxShadow:`0 2px 10px ${fp.color}44`}} title={fp.label}>{fp.short}</div>
+            {!isMobile&&<span style={{fontSize:11.5,fontWeight:700,color:fp.color}}>{fp.label}</span>}
           </div>
         </div>
 
         {/* Content */}
-        <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
+        <div style={{flex:1,overflowY:"auto",padding:isMobile?"10px 12px":"16px 20px",display:"flex",flexDirection:"column",gap:14}}>
           {tab==="dashboard"    &&<Dashboard     leads={leads} role={role} isMobile={isMobile}/>}
           {tab==="leads"        &&<LeadsPage     leads={leads} setLeads={setLeads} role={role} isMobile={isMobile} onOpenLead={l=>{setSelectedLead(l);}}/>}
           {tab==="clients"      &&<ClientsPage   role={role} isMobile={isMobile}/>}
@@ -1589,12 +1625,12 @@ export default function CRM(){
 
         {/* Mobile bottom nav */}
         {isMobile&&(
-          <div style={{display:"flex",borderTop:`1px solid ${C.border}`,background:C.surface,flexShrink:0}}>
-            {[{id:"dashboard",icon:"⊞"},{id:"leads",icon:"◎"},{id:"clients",icon:"❖"},{id:"calendar",icon:"📅"},{id:"forecast",icon:"📈"}].filter(i=>allowed.includes(i.id)).map(item=>(
-              <button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,padding:"9px 4px",border:"none",background:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:tab===item.id?C.accent:C.muted,fontSize:17,position:"relative"}}>
-                {item.icon}
-                {item.id==="leads"&&pendingCount>0&&<span style={{position:"absolute",top:5,right:"calc(50% - 14px)",background:C.amber,color:"#000",fontSize:9,fontWeight:700,borderRadius:10,padding:"0 4px"}}>{pendingCount}</span>}
-                <span style={{fontSize:9,fontWeight:600}}>{item.id}</span>
+          <div style={{display:"flex",borderTop:`1px solid ${C.border}`,background:C.surface,flexShrink:0,paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
+            {[{id:"dashboard",icon:"⊞",label:"Home"},{id:"leads",icon:"◎",label:"Leads"},{id:"clients",icon:"❖",label:"Clients"},{id:"calendar",icon:"📅",label:"Calendar"},{id:"forecast",icon:"📈",label:"Forecast"}].filter(i=>allowed.includes(i.id)).map(item=>(
+              <button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,padding:"10px 4px 8px",border:"none",background:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,color:tab===item.id?C.accent:C.muted,position:"relative",transition:"color 0.12s"}}>
+                <span style={{fontSize:18,lineHeight:1}}>{item.icon}</span>
+                {item.id==="leads"&&pendingCount>0&&<span style={{position:"absolute",top:6,right:"calc(50% - 16px)",background:C.amber,color:"#1A0E00",fontSize:9,fontWeight:700,borderRadius:8,padding:"0 4px"}}>{pendingCount}</span>}
+                <span style={{fontSize:9.5,fontWeight:tab===item.id?700:500}}>{item.label}</span>
               </button>
             ))}
           </div>
