@@ -1530,6 +1530,13 @@ export default function CRM(){
   const [leads,setLeads]=useState(INIT_LEADS);
   const [selectedLead,setSelectedLead]=useState(null);
   const [notifOpen,setNotifOpen]=useState(false);
+  const searchRef=useRef(null);
+
+  useEffect(()=>{
+    const h=(e)=>{if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();searchRef.current?.focus();}};
+    window.addEventListener("keydown",h);
+    return()=>window.removeEventListener("keydown",h);
+  },[]);
 
   const fp=ROLES[role];
   const allowed=fp.pages||[];
@@ -1597,47 +1604,52 @@ export default function CRM(){
   const NotifItem=({icon,msg,c})=>(<div style={{display:"flex",gap:9,alignItems:"flex-start",padding:"9px 11px",background:`${c}12`,border:`1px solid ${c}25`,borderRadius:10,marginBottom:6,fontSize:11,color:c,fontWeight:500,lineHeight:1.45}}><span style={{flexShrink:0}}>{icon}</span><span>{msg}</span></div>);
 
   return(
-    <div style={{display:"flex",height:"100vh",fontFamily:"'Plus Jakarta Sans','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
+    <div style={{display:"flex",height:"100vh",fontFamily:"'Outfit','Segoe UI',sans-serif",background:C.bg,color:C.text,overflow:"hidden",fontSize:13}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
-        body,button,select,input,textarea{font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;}
+        body,button,select,input,textarea{font-family:'Outfit','Segoe UI',sans-serif;}
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:transparent;}
-        ::-webkit-scrollbar-thumb{background:#1F3050;border-radius:4px;}
-        ::-webkit-scrollbar-thumb:hover{background:#2A4060;}
-        select option{background:#131F32;}
+        ::-webkit-scrollbar-thumb{background:#2A2A36;border-radius:4px;}
+        ::-webkit-scrollbar-thumb:hover{background:#3A3A48;}
+        select option{background:#18181F;}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes livePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0.55}}
         @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-        input[type=radio],input[type=checkbox]{cursor:pointer;accent-color:#4F9EFF;}
-        input:focus,select:focus,textarea:focus{outline:none;border-color:#4F9EFF!important;box-shadow:0 0 0 3px rgba(79,158,255,0.12)!important;}
-        table tbody tr:hover td{background:rgba(31,48,80,0.35);}
-        .nav-item:hover{background:rgba(79,158,255,0.08)!important;color:#DFF0FF!important;}
+        input[type=radio],input[type=checkbox]{cursor:pointer;accent-color:#C9A84C;}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:#C9A84C!important;box-shadow:0 0 0 3px rgba(201,168,76,0.12)!important;}
+        table tbody tr:hover td{background:rgba(42,42,54,0.5);}
+        .nav-item:hover{background:rgba(201,168,76,0.07)!important;color:#F0EDE8!important;}
       `}</style>
 
-      {!isMobile&&<div style={{width:224,minWidth:224,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
+      {!isMobile&&<div style={{width:228,minWidth:228,background:C.surface,borderRight:`1px solid ${C.border}`,flexShrink:0}}><Sidebar/></div>}
       {isMobile&&sidebarOpen&&(
         <div style={{position:"fixed",inset:0,zIndex:200,display:"flex"}}>
           <div style={{width:240,background:C.surface,borderRight:`1px solid ${C.border}`}}><Sidebar/></div>
-          <div style={{flex:1,background:"rgba(0,0,0,0.65)",backdropFilter:"blur(4px)"}} onClick={()=>setSidebarOpen(false)}/>
+          <div style={{flex:1,background:"rgba(0,0,0,0.72)",backdropFilter:"blur(4px)"}} onClick={()=>setSidebarOpen(false)}/>
         </div>
       )}
 
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",minWidth:0}}>
         {/* Topbar */}
-        <div style={{padding:isMobile?"10px 14px":"12px 22px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:10,flexShrink:0}}>
+        <div style={{padding:isMobile?"10px 14px":"11px 22px",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,gap:10,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             {isMobile&&<button style={{background:C.card2,border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.text,fontSize:16,padding:"6px 9px",lineHeight:1}} onClick={()=>setSidebarOpen(true)}>☰</button>}
             <div>
-              <div style={{fontSize:isMobile?14:16,fontWeight:800,letterSpacing:"-0.025em",color:C.text}}>{TITLES[tab]}</div>
-              {!isMobile&&<div style={{fontSize:10,color:C.muted,marginTop:1,letterSpacing:"0.04em"}}>IPIX Technologies · CRM</div>}
+              <div style={{fontSize:isMobile?14:15,fontWeight:700,letterSpacing:"-0.02em",color:C.text}}>{TITLES[tab]}</div>
+              {!isMobile&&<div style={{fontSize:10,color:C.muted,marginTop:1,letterSpacing:"0.04em",display:"flex",alignItems:"center",gap:6}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:C.green,display:"inline-block",animation:"livePulse 2s ease-in-out infinite"}}/>
+                <span>LIVE · {new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</span>
+              </div>}
             </div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             {!isMobile&&(
               <div style={{position:"relative"}}>
-                <input style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,color:C.text,padding:"8px 14px 8px 36px",fontSize:12,outline:"none",width:200}} placeholder="Search anything..."/>
+                <input ref={searchRef} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,color:C.text,padding:"8px 60px 8px 36px",fontSize:12,outline:"none",width:220,transition:"border-color 0.15s"}} placeholder="Search anything..."/>
                 <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.muted,fontSize:14,pointerEvents:"none"}}>⌕</span>
+                <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:C.card2,border:`1px solid ${C.border}`,borderRadius:5,fontSize:9,color:C.muted,padding:"2px 5px",pointerEvents:"none",letterSpacing:"0.03em"}}>⌘K</span>
               </div>
             )}
             <div style={{position:"relative"}}>
@@ -1646,8 +1658,8 @@ export default function CRM(){
                 {totalAlerts>0&&<span style={{position:"absolute",top:-5,right:-5,background:C.red,color:"#fff",fontSize:9,fontWeight:700,borderRadius:10,padding:"1px 5px",minWidth:16,textAlign:"center",boxShadow:`0 0 8px ${C.red}66`}}>{totalAlerts}</span>}
               </button>
               {notifOpen&&(
-                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:310,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:16,zIndex:100,boxShadow:"0 20px 60px rgba(0,0,0,0.65)",animation:"slideDown 0.15s ease"}}>
-                  <div style={{fontWeight:800,marginBottom:12,fontSize:14,letterSpacing:"-0.01em",paddingBottom:10,borderBottom:`1px solid ${C.border}`}}>Alerts &amp; Notifications</div>
+                <div style={{position:"absolute",right:0,top:"calc(100% + 8px)",width:310,background:C.surface,border:`1px solid ${C.border}`,borderRadius:16,padding:16,zIndex:100,boxShadow:`0 24px 70px rgba(0,0,0,0.75),0 0 0 1px ${C.accent}18`,animation:"slideDown 0.15s ease"}}>
+                  <div style={{fontWeight:700,marginBottom:12,fontSize:14,letterSpacing:"-0.01em",paddingBottom:10,borderBottom:`1px solid ${C.border}`,borderLeft:`3px solid ${C.accent}`,paddingLeft:10}}>Alerts &amp; Notifications</div>
                   {pendingCount>0&&<NotifItem icon="⏳" msg={`${pendingCount} assignment(s) pending approval`} c={C.amber}/>}
                   {slaCount>0&&<NotifItem icon="🚨" msg={`${slaCount} SLA breach(es) — 2-hour rule`} c={C.red}/>}
                   {agingCount>0&&<NotifItem icon="⚠️" msg={`${agingCount} deal(s) over stage time limit`} c={C.orange}/>}
