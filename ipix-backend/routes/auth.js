@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const supabase = require("../supabase");
+const { supabaseAuth } = require("../supabase");
 
 /* ── SIGN UP (Admin only creates users) ── */
 router.post("/signup", async (req, res) => {
@@ -10,7 +11,7 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ success: false, error: "email, password, name, role are required" });
     }
 
-    // Create auth user
+    // Create auth user (admin client)
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -44,10 +45,11 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ success: false, error: "email and password required" });
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    // Use anon-key client for user-facing sign-in
+    const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({ email, password });
     if (authError) throw authError;
 
-    // Get user profile
+    // Get user profile (admin client bypasses RLS)
     const { data: profile, error: profileError } = await supabase
       .from("users").select("*").eq("id", authData.user.id).single();
     if (profileError) throw profileError;
@@ -71,6 +73,7 @@ router.post("/login", async (req, res) => {
       }
     });
   } catch (err) {
+    console.error("Login error:", err.message);
     res.status(401).json({ success: false, error: "Invalid email or password" });
   }
 });
