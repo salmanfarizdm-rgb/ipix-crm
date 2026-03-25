@@ -21,3 +21,15 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.vercel
+
+# Build outputs
+/dist
+/dist-sales
+/nikshan-crm/dist
+/nikshan-crm/node_modules
+/nikshan-backend/node_modules
+
+# Env files
+.env
+**/.env
