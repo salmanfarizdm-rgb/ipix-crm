@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build:sales",
+  "outputDirectory": "dist-sales",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index-sales.html" }]
+}
