@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "concurrently -n \"retail,sales\" -c \"cyan,magenta\" \"npm run dev:retail\" \"npm run dev:sales\"",
+    "dev:retail": "vite --config vite.config.js",
+    "dev:sales": "vite --config vite.config.sales.js",
+    "build:retail": "vite build --config vite.config.js",
+    "build:sales": "vite build --config vite.config.sales.js",
+    "preview:retail": "vite preview --config vite.config.js",
+    "preview:sales": "vite preview --config vite.config.sales.js"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -26,6 +30,7 @@
     "vite": "^5.1.4",
     "tailwindcss": "^3.4.1",
     "autoprefixer": "^10.4.17",
-    "postcss": "^8.4.35"
+    "postcss": "^8.4.35",
+    "concurrently": "^8.2.2"
   }
 }
