@@ -6,8 +6,10 @@ router.get("/", async (req, res) => {
   try {
     let q = db.from("nk_emi_records").select("*, nk_customers(name,phone), nk_purchases(product_name,amount)").order("created_at", { ascending: false });
     if (req.query.customer_id) q = q.eq("customer_id", req.query.customer_id);
-    if (req.query.bank_name) q = q.eq("bank_name", req.query.bank_name);
-    if (req.query.status) q = q.eq("status", req.query.status);
+    if (req.query.bank_name)   q = q.eq("bank_name", req.query.bank_name);
+    if (req.query.status)      q = q.eq("status", req.query.status);
+    if (req.query.from)        q = q.gte("start_date", req.query.from);
+    if (req.query.to)          q = q.lte("start_date", req.query.to);
     const { data, error } = await q;
     if (error) throw error;
     res.json({ success: true, data });

@@ -3,7 +3,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8',800:'#1e40af',900:'#1e3a8a' }
+        primary: {
+          50:  '#f6f3fb',
+          100: '#ebe2f7',
+          200: '#cfbaea',
+          300: '#ac8fd6',
+          400: '#8a63bb',
+          500: '#6a4398',
+          600: '#432a6f',
+          700: '#2f1a56',
+          800: '#200f3d',
+          900: '#170b2e',
+        }
       }
     }
   },

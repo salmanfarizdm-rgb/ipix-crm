@@ -5,10 +5,12 @@ const db      = require("../supabase");
 router.get("/", async (req, res) => {
   try {
     let q = db.from("nk_leads").select("*, nk_stores(name), nk_users!nk_leads_assigned_to_fkey(name,role), nk_users!nk_leads_converted_by_fkey(name)").order("created_at", { ascending: false });
-    if (req.query.status) q = q.eq("status", req.query.status);
-    if (req.query.store_id) q = q.eq("store_id", req.query.store_id);
+    if (req.query.status)      q = q.eq("status", req.query.status);
+    if (req.query.store_id)    q = q.eq("store_id", req.query.store_id);
     if (req.query.assigned_to) q = q.eq("assigned_to", req.query.assigned_to);
-    if (req.query.search) q = q.or(`name.ilike.%${req.query.search}%,phone.ilike.%${req.query.search}%`);
+    if (req.query.search)      q = q.or(`name.ilike.%${req.query.search}%,phone.ilike.%${req.query.search}%`);
+    if (req.query.from)        q = q.gte("created_at", req.query.from);
+    if (req.query.to)          q = q.lte("created_at", req.query.to + "T23:59:59");
     const { data, error } = await q;
     if (error) throw error;
     res.json({ success: true, data });

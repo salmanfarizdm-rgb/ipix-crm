@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IPIX CRM — Nikshan Electronics | Project Document</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; color: #1a1a2e; }
+
+  .cover {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white; min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center; padding: 40px;
+    page-break-after: always;
+  }
+  .cover .logo { font-size: 72px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, #e94560, #a855f7); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+  .cover h1 { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .cover h2 { font-size: 20px; font-weight: 400; opacity: 0.7; margin-bottom: 40px; }
+  .cover .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px; padding: 8px 24px; font-size: 14px; display: inline-block; margin: 4px; }
+  .cover .meta { margin-top: 60px; opacity: 0.5; font-size: 13px; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+
+  h2.section-title {
+    font-size: 28px; font-weight: 800; color: #1a1a2e;
+    border-left: 5px solid #e94560; padding-left: 16px;
+    margin: 48px 0 24px;
+  }
+  h3.sub-title { font-size: 18px; font-weight: 700; color: #0f3460; margin: 24px 0 12px; }
+  h4.sub-sub { font-size: 15px; font-weight: 600; color: #e94560; margin: 16px 0 8px; }
+
+  p { line-height: 1.75; color: #444; margin-bottom: 12px; font-size: 15px; }
+
+  .card {
+    background: white; border-radius: 16px; padding: 28px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06); margin-bottom: 20px;
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+  .module-card {
+    background: white; border-radius: 12px; padding: 20px;
+    border-top: 4px solid #e94560; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .module-card.purple { border-top-color: #a855f7; }
+  .module-card.blue   { border-top-color: #3b82f6; }
+  .module-card.green  { border-top-color: #22c55e; }
+  .module-card.orange { border-top-color: #f97316; }
+  .module-card.teal   { border-top-color: #14b8a6; }
+  .module-card.yellow { border-top-color: #eab308; }
+
+  .module-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .module-card p  { font-size: 13px; color: #666; margin: 0; line-height: 1.6; }
+
+  .icon { font-size: 24px; margin-bottom: 8px; }
+
+  ul { padding-left: 20px; margin-bottom: 12px; }
+  ul li { line-height: 1.8; font-size: 14px; color: #555; }
+
+  .badge-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .badge {
+    padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    background: #f0f0f0; color: #333;
+  }
+  .badge.red    { background: #fee2e2; color: #dc2626; }
+  .badge.purple { background: #f3e8ff; color: #7c3aed; }
+  .badge.blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge.green  { background: #dcfce7; color: #16a34a; }
+  .badge.orange { background: #ffedd5; color: #c2410c; }
+  .badge.teal   { background: #ccfbf1; color: #0d9488; }
+  .badge.dark   { background: #1a1a2e; color: white; }
+
+  .flow-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 16px 0; }
+  .flow-step {
+    background: white; border: 2px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 18px; font-size: 13px; font-weight: 600; text-align: center; min-width: 100px;
+  }
+  .flow-arrow { font-size: 20px; color: #a855f7; margin: 0 6px; }
+
+  .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin: 16px 0; }
+  .role-card { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .role-card .role-icon { font-size: 28px; margin-bottom: 6px; }
+  .role-card h4 { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .role-card p  { font-size: 12px; color: #888; margin: 4px 0 0; }
+
+  .table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  .table th { background: #1a1a2e; color: white; padding: 10px 14px; text-align: left; font-size: 13px; }
+  .table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .table tr:nth-child(even) td { background: #fafafa; }
+
+  .stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .stack-item { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .stack-item .tech { font-size: 22px; margin-bottom: 6px; }
+  .stack-item h4 { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+  .stack-item p  { font-size: 11px; color: #888; margin: 0; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #f3e8ff, #dbeafe);
+    border-left: 4px solid #a855f7; border-radius: 10px;
+    padding: 16px 20px; margin: 16px 0;
+  }
+  .highlight-box p { color: #1a1a2e; margin: 0; font-size: 14px; font-weight: 500; }
+
+  .footer {
+    background: #1a1a2e; color: white; text-align: center;
+    padding: 40px; margin-top: 60px;
+  }
+  .footer p { color: rgba(255,255,255,0.5); font-size: 13px; margin: 4px 0; }
+
+  .divider { height: 1px; background: #e2e8f0; margin: 32px 0; }
+
+  @media print {
+    .cover { min-height: auto; padding: 60px; }
+    .container { padding: 24px; }
+    body { background: white; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="logo">IX</div>
+  <h1>IPIX CRM</h1>
+  <h2>Nikshan Electronics Management System</h2>
+  <div style="margin: 20px 0;">
+    <span class="badge">Version 2.0</span>
+    <span class="badge">March 2026</span>
+    <span class="badge">Full-Stack Web App</span>
+  </div>
+  <p style="max-width: 500px; opacity: 0.7; font-size: 15px; margin-top: 20px; line-height: 1.8;">
+    A complete Customer Relationship Management system built specifically for Nikshan Electronics — managing sales, service, EMI, deliveries, leads, and more from a single dashboard.
+  </p>
+  <div class="meta">
+    Built by IPIX Technologies &nbsp;|&nbsp; Powered by React + Node.js + Supabase
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- 1. OVERVIEW -->
+  <h2 class="section-title">1. Project Overview</h2>
+  <div class="card">
+    <p>
+      IPIX CRM is a custom-built web application designed exclusively for <strong>Nikshan Electronics</strong>.
+      It replaces manual spreadsheets and disconnected tools with a single unified platform that handles
+      the entire customer lifecycle — from the first lead to after-sales service.
+    </p>
+    <p>
+      The system supports multiple branches (stores), multiple user roles, and covers sales with GST billing,
+      EMI financing, delivery tracking, service requests, warranty management, and WhatsApp notifications —
+      all in one place.
+    </p>
+    <div class="badge-list">
+      <span class="badge dark">Multi-Branch</span>
+      <span class="badge dark">Multi-Role</span>
+      <span class="badge dark">GST Compliant</span>
+      <span class="badge dark">WhatsApp Ready</span>
+      <span class="badge dark">EMI Tracking</span>
+      <span class="badge dark">Warranty Alerts</span>
+      <span class="badge dark">Real-time Data</span>
+    </div>
+  </div>
+
+  <!-- 2. TECH STACK -->
+  <h2 class="section-title">2. Technology Stack</h2>
+  <div class="stack-grid">
+    <div class="stack-item">
+      <div class="tech">⚛️</div>
+      <h4>React 18 + Vite</h4>
+      <p>Frontend UI framework</p>
+    </div>
+    <div class="stack-item">
+      <div class="tech">🎨</div>
+      <h4>Tailwind CSS</h4>
+      <p>Styling & design system</p>
+    </div>
+    <div class="stack-item">
+      <div class="tech">🟢</div>
+      <h4>Node.js + Express</h4>
+      <p>Backend API server</p>
+    </div>
+    <div class="stack-item">
+      <div class="tech">🐘</div>
+      <h4>Supabase (PostgreSQL)</h4>
+      <p>Database + Auth</p>
+    </div>
+    <div class="stack-item">
+      <div class="tech">🔐</div>
+      <h4>JWT Auth</h4>
+      <p>Secure login & sessions</p>
+    </div>
+    <div class="stack-item">
+      <div class="tech">📱</div>
+      <h4>WhatsApp Deep Links</h4>
+      <p>Instant customer messaging</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="sub-title">How It Works (Architecture)</h3>
+    <div class="flow-row">
+      <div class="flow-step">👤 Browser<br/><small>Staff / Admin</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">⚛️ React App<br/><small>Port 3003</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🟢 Express API<br/><small>Port 3004</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🐘 Supabase<br/><small>PostgreSQL DB</small></div>
+    </div>
+    <p style="margin-top:12px; font-size:13px; color:#888;">
+      The frontend (React) communicates with the backend (Express) via REST API. The backend connects to Supabase PostgreSQL for all data storage. Authentication uses Supabase Auth with JWT tokens.
+    </p>
+  </div>
+
+  <!-- 3. USER ROLES -->
+  <h2 class="section-title">3. User Roles & Access</h2>
+  <p>The system has 5 user roles with different permission levels. Each role sees only what they need.</p>
+  <div class="role-grid">
+    <div class="role-card">
+      <div class="role-icon">👑</div>
+      <h4>Admin</h4>
+      <p>Full access to everything — all stores, all users, all reports</p>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🏪</div>
+      <h4>Branch Manager</h4>
+      <p>Full access to their own store — sales, staff, reports</p>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">📊</div>
+      <h4>Sales Manager</h4>
+      <p>Manage sales team, leads, follow-ups, purchases</p>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🛒</div>
+      <h4>Sales Executive</h4>
+      <p>Create sales, manage customers, leads, follow-ups</p>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🔧</div>
+      <h4>Technician</h4>
+      <p>View and update service requests only</p>
+    </div>
+  </div>
+
+  <!-- 4. MODULES -->
+  <h2 class="section-title">4. Modules Built</h2>
+  <p>The system has <strong>14 functional modules</strong>, each serving a specific business purpose.</p>
+
+  <div class="card-grid">
+
+    <div class="module-card">
+      <div class="icon">📊</div>
+      <h3>Dashboard</h3>
+      <p>Live overview — today's sales, revenue, pending follow-ups, low stock alerts, pending deliveries, and quick action shortcuts.</p>
+    </div>
+
+    <div class="module-card blue">
+      <div class="icon">👥</div>
+      <h3>Customers</h3>
+      <p>Full customer profiles with purchase history, service history, activity timeline, warranty status, and WhatsApp reminders.</p>
+    </div>
+
+    <div class="module-card green">
+      <div class="icon">🛒</div>
+      <h3>Sales / Cart</h3>
+      <p>Add products to cart, auto-fill GST %, apply discounts, split payments, generate GST invoice, and send WhatsApp receipt instantly.</p>
+    </div>
+
+    <div class="module-card purple">
+      <div class="icon">📦</div>
+      <h3>Products</h3>
+      <p>Product catalog with GST %, warranty months, stock count, low stock threshold, and quick stock update feature.</p>
+    </div>
+
+    <div class="module-card orange">
+      <div class="icon">🏪</div>
+      <h3>Stores</h3>
+      <p>Manage multiple branches — store name, address, phone, GSTIN. Each staff is linked to a store.</p>
+    </div>
+
+    <div class="module-card teal">
+      <div class="icon">💳</div>
+      <h3>EMI Tracker</h3>
+      <p>Track EMI-based purchases — bank, tenure, monthly amount, due dates, payment status with date filters.</p>
+    </div>
+
+    <div class="module-card">
+      <div class="icon">🔧</div>
+      <h3>Service Requests</h3>
+      <p>Log customer complaints, check warranty status automatically, track repair progress, and send WhatsApp on resolution.</p>
+    </div>
+
+    <div class="module-card blue">
+      <div class="icon">🎯</div>
+      <h3>Leads</h3>
+      <p>Capture potential customers — source, interest, assigned staff, status. Filter by date and convert to customer on sale.</p>
+    </div>
+
+    <div class="module-card green">
+      <div class="icon">📞</div>
+      <h3>Follow-ups</h3>
+      <p>Schedule and track follow-up calls/visits — due dates, status (pending/done/missed), filter by date range.</p>
+    </div>
+
+    <div class="module-card purple">
+      <div class="icon">🚚</div>
+      <h3>Deliveries</h3>
+      <p>Track product deliveries — scheduled, out for delivery, delivered, failed. Overdue alerts and WhatsApp notify on delivery.</p>
+    </div>
+
+    <div class="module-card orange">
+      <div class="icon">👤</div>
+      <h3>Users & Team</h3>
+      <p>Create and manage staff accounts — role, store assignment, active/inactive status, last login tracking.</p>
+    </div>
+
+    <div class="module-card teal">
+      <div class="icon">📈</div>
+      <h3>Reports</h3>
+      <p>Sales reports, revenue by store, product performance, team performance metrics, and date-filtered exports.</p>
+    </div>
+
+    <div class="module-card">
+      <div class="icon">🤖</div>
+      <h3>AI Reports</h3>
+      <p>Ask questions in plain English — "What was the best selling product this month?" — AI generates the answer.</p>
+    </div>
+
+    <div class="module-card blue">
+      <div class="icon">📋</div>
+      <h3>Activity Log</h3>
+      <p>Per-customer timeline of all interactions — calls, WhatsApp messages, visits, purchases, and service events.</p>
+    </div>
+
+  </div>
+
+  <!-- 5. KEY FEATURES -->
+  <h2 class="section-title">5. Key Features Explained</h2>
+
+  <h3 class="sub-title">5.1 GST Billing System</h3>
+  <div class="card">
+    <p>Every product has a GST percentage (0%, 5%, 12%, 18%, 28%) stored in the product database. When a sale is made:</p>
+    <div class="flow-row">
+      <div class="flow-step">Select Product<br/><small>GST auto-fills</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Apply Discount<br/><small>Get final price</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">GST Calculated<br/><small>On final price</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Grand Total<br/><small>Incl. GST</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Print Invoice<br/><small>With GSTIN</small></div>
+    </div>
+    <ul>
+      <li>Store GSTIN number is printed on every invoice</li>
+      <li>Invoice shows subtotal, GST breakup by rate, and grand total</li>
+      <li>All GST data is saved to the database for accounting</li>
+    </ul>
+  </div>
+
+  <h3 class="sub-title">5.2 Split Payment</h3>
+  <div class="card">
+    <p>Customers can pay using two payment methods in a single transaction — e.g., part cash + part card, or part UPI + part EMI.</p>
+    <ul>
+      <li>Enable "Split Payment" toggle in the cart</li>
+      <li>Choose Payment Method 1 + Amount 1</li>
+      <li>Choose Payment Method 2 + Amount 2</li>
+      <li>System validates: Amount 1 + Amount 2 must equal Grand Total</li>
+      <li>Both payments are saved and shown on the invoice</li>
+    </ul>
+    <div class="badge-list">
+      <span class="badge green">Cash</span>
+      <span class="badge blue">Card</span>
+      <span class="badge purple">UPI</span>
+      <span class="badge orange">EMI</span>
+      <span class="badge teal">Cheque</span>
+      <span class="badge red">Gift / Free</span>
+    </div>
+  </div>
+
+  <h3 class="sub-title">5.3 WhatsApp Integration</h3>
+  <div class="card">
+    <p>One-click WhatsApp messages are sent directly to the customer's phone without any third-party API cost. It opens WhatsApp with a pre-filled message.</p>
+    <table class="table">
+      <tr>
+        <th>Trigger</th>
+        <th>Message Sent</th>
+      </tr>
+      <tr>
+        <td>After Purchase</td>
+        <td>Purchase receipt with product details, amount, and store contact</td>
+      </tr>
+      <tr>
+        <td>Service Resolved</td>
+        <td>"Your device is ready for pickup" notification</td>
+      </tr>
+      <tr>
+        <td>Warranty Expiring</td>
+        <td>Warranty reminder with expiry date and service offer</td>
+      </tr>
+      <tr>
+        <td>Delivery Done</td>
+        <td>Delivery confirmation with thank you message</td>
+      </tr>
+    </table>
+  </div>
+
+  <h3 class="sub-title">5.4 Warranty Tracker</h3>
+  <div class="card">
+    <p>Each product has a warranty period (in months). When a sale is made, the warranty expiry date is automatically calculated and stored.</p>
+    <div class="badge-list">
+      <span class="badge green">✅ IN WARRANTY — Green badge</span>
+      <span class="badge orange">⚠️ EXPIRING SOON — Orange (within 30 days)</span>
+      <span class="badge red">❌ OUT OF WARRANTY — Red badge</span>
+    </div>
+    <ul>
+      <li>Visible on Customer Detail page under each purchase</li>
+      <li>Visible on Service Request form — auto-checks warranty when customer is selected</li>
+      <li>"Remind via WhatsApp" button appears for expiring warranties</li>
+    </ul>
+  </div>
+
+  <h3 class="sub-title">5.5 Delivery Tracking</h3>
+  <div class="card">
+    <p>A dedicated delivery management page tracks all product deliveries from the store to the customer's address.</p>
+    <div class="flow-row">
+      <div class="flow-step" style="border-color:#3b82f6; color:#3b82f6">📅 Scheduled</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:#f97316; color:#f97316">🚚 Out for Delivery</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:#22c55e; color:#22c55e">✅ Delivered</div>
+    </div>
+    <p style="margin-top:8px; color:#e94560; font-size:13px;">⚠️ Overdue deliveries are highlighted in red automatically</p>
+  </div>
+
+  <h3 class="sub-title">5.6 Date Filters (All Pages)</h3>
+  <div class="card">
+    <p>Every list page has a consistent date filter bar allowing staff to quickly filter records by time period.</p>
+    <div class="badge-list">
+      <span class="badge">Today</span>
+      <span class="badge">This Week</span>
+      <span class="badge">This Month</span>
+      <span class="badge">Last Month</span>
+      <span class="badge">Custom Range</span>
+      <span class="badge red">Clear</span>
+    </div>
+    <p>Available on: Purchases, Service Requests, EMI Tracker, Leads, Follow-ups, Deliveries</p>
+  </div>
+
+  <h3 class="sub-title">5.7 Return / Replacement Policy Checker</h3>
+  <div class="card">
+    <p>When a service request is created and the request type is "Return" or "Replacement", the system automatically checks:</p>
+    <ul>
+      <li><strong>Return window:</strong> 15 days from purchase date</li>
+      <li><strong>Replacement window:</strong> 30 days from purchase date</li>
+      <li>Shows ✅ "Within window", ⚠️ "Last Day", or ❌ "Window closed"</li>
+    </ul>
+  </div>
+
+  <!-- 6. DATABASE -->
+  <h2 class="section-title">6. Database Structure</h2>
+  <div class="card">
+    <p>The database is hosted on <strong>Supabase (PostgreSQL)</strong>. All tables follow the prefix <code style="background:#f0f0f0; padding:2px 6px; border-radius:4px; font-size:13px;">nk_</code> for Nikshan.</p>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Table</th>
+        <th>Purpose</th>
+        <th>Key Fields</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>nk_customers</strong></td>
+        <td>All customer profiles</td>
+        <td>name, phone, email, address, loyalty_points, referred_by</td>
+      </tr>
+      <tr>
+        <td><strong>nk_products</strong></td>
+        <td>Product catalog</td>
+        <td>name, model_no, brand, price, gst_percentage, warranty_months, stock_count</td>
+      </tr>
+      <tr>
+        <td><strong>nk_stores</strong></td>
+        <td>Branch/store info</td>
+        <td>name, address, phone, gstin</td>
+      </tr>
+      <tr>
+        <td><strong>nk_users</strong></td>
+        <td>Staff accounts</td>
+        <td>name, email, role, store_id, active, last_login</td>
+      </tr>
+      <tr>
+        <td><strong>nk_purchases</strong></td>
+        <td>Individual product sale lines</td>
+        <td>product_id, final_price, gst_percentage, gst_amount, warranty_expiry</td>
+      </tr>
+      <tr>
+        <td><strong>nk_invoices</strong></td>
+        <td>Full sale invoice</td>
+        <td>payment_type, total_amount, gst_total, split_payment, amount1, amount2</td>
+      </tr>
+      <tr>
+        <td><strong>nk_emi_records</strong></td>
+        <td>EMI financing records</td>
+        <td>bank_name, tenure_months, monthly_emi, start_date, status</td>
+      </tr>
+      <tr>
+        <td><strong>nk_service_requests</strong></td>
+        <td>Repair / service tickets</td>
+        <td>issue, status, technician_id, resolved_at, whatsapp_sent</td>
+      </tr>
+      <tr>
+        <td><strong>nk_leads</strong></td>
+        <td>Potential customers</td>
+        <td>name, phone, source, interest, status, assigned_to</td>
+      </tr>
+      <tr>
+        <td><strong>nk_followups</strong></td>
+        <td>Follow-up schedule</td>
+        <td>customer_id, due_date, notes, status (pending/done/missed)</td>
+      </tr>
+      <tr>
+        <td><strong>nk_deliveries</strong></td>
+        <td>Delivery tracking</td>
+        <td>invoice_id, address, scheduled_date, status, delivered_at</td>
+      </tr>
+      <tr>
+        <td><strong>nk_activity_log</strong></td>
+        <td>Customer interaction history</td>
+        <td>customer_id, action_type, notes, created_by, created_at</td>
+      </tr>
+      <tr>
+        <td><strong>nk_targets</strong></td>
+        <td>Sales targets per staff/store</td>
+        <td>user_id, store_id, month, year, target_amount, target_type</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 7. COMPLETE FLOW -->
+  <h2 class="section-title">7. Complete Business Flow</h2>
+
+  <h3 class="sub-title">7.1 Customer Walk-in → Sale Flow</h3>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-step">Customer walks in</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Search / Add Customer</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Open Cart</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Add Products</div>
+    </div>
+    <br/>
+    <div class="flow-row">
+      <div class="flow-step">GST auto-fills</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Apply Discount</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Choose Payment</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Confirm Sale</div>
+    </div>
+    <br/>
+    <div class="flow-row">
+      <div class="flow-step">Invoice Generated</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Stock Decremented</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Warranty Saved</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">WhatsApp Receipt</div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">7.2 Lead → Customer Conversion Flow</h3>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-step">New Lead Added<br/><small>Phone/Walk-in/Ref</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Assign to Staff</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Follow-up Scheduled</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Follow-up Done</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Lead → Customer<br/><small>On first purchase</small></div>
+    </div>
+  </div>
+
+  <h3 class="sub-title">7.3 Service Request Flow</h3>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-step">Customer calls<br/><small>with complaint</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Select Customer<br/><small>+ Purchase</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Warranty check<br/><small>Auto display</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Assign Technician</div>
+    </div>
+    <br/>
+    <div class="flow-row">
+      <div class="flow-step">In Progress</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Resolved</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">WhatsApp Sent<br/><small>"Device ready"</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Customer Collects</div>
+    </div>
+  </div>
+
+  <!-- 8. PAGES LIST -->
+  <h2 class="section-title">8. All Pages & Navigation</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Page</th>
+        <th>URL</th>
+        <th>Who Can Access</th>
+        <th>Main Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Login</td><td>/login</td><td>Everyone</td><td>Secure sign-in with role-based redirect</td></tr>
+      <tr><td>Dashboard</td><td>/</td><td>All roles</td><td>Live stats, alerts, quick actions</td></tr>
+      <tr><td>Customers</td><td>/customers</td><td>All roles</td><td>Customer list, search, add new</td></tr>
+      <tr><td>Customer Detail</td><td>/customers/:id</td><td>All roles</td><td>Full customer profile, purchases, service, activity</td></tr>
+      <tr><td>Products</td><td>/products</td><td>Admin, Manager</td><td>Product catalog with stock management</td></tr>
+      <tr><td>Stores</td><td>/stores</td><td>Admin only</td><td>Branch management with GSTIN</td></tr>
+      <tr><td>Purchases</td><td>/purchases</td><td>All sales roles</td><td>Sales history with date filters</td></tr>
+      <tr><td>EMI Tracker</td><td>/emi</td><td>All sales roles</td><td>EMI payment tracking</td></tr>
+      <tr><td>Service Requests</td><td>/service</td><td>All roles</td><td>Repair tickets management</td></tr>
+      <tr><td>Leads</td><td>/leads</td><td>Sales roles</td><td>Lead pipeline management</td></tr>
+      <tr><td>Follow-ups</td><td>/followups</td><td>Sales roles</td><td>Scheduled call & visit tracking</td></tr>
+      <tr><td>Deliveries</td><td>/deliveries</td><td>All roles</td><td>Product delivery status tracking</td></tr>
+      <tr><td>Users</td><td>/users</td><td>Admin, Manager</td><td>Staff account management</td></tr>
+      <tr><td>Reports</td><td>/reports</td><td>Admin, Manager</td><td>Sales & performance reports</td></tr>
+      <tr><td>AI Reports</td><td>/ai-reports</td><td>Admin, Manager</td><td>Natural language business queries</td></tr>
+      <tr><td>Team Performance</td><td>/performance</td><td>Admin, Manager</td><td>Staff sales performance metrics</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 9. API ENDPOINTS -->
+  <h2 class="section-title">9. Backend API Endpoints</h2>
+  <div class="card">
+    <p>All API endpoints are prefixed with <code style="background:#f0f0f0; padding:2px 6px; border-radius:4px;">/api</code> and require a JWT token in the Authorization header (except login).</p>
+  </div>
+  <table class="table">
+    <thead>
+      <tr><th>Endpoint</th><th>Method</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/api/auth/login</td><td>POST</td><td>Login and get JWT token</td></tr>
+      <tr><td>/api/customers</td><td>GET / POST</td><td>List or create customers</td></tr>
+      <tr><td>/api/customers/:id</td><td>GET / PUT</td><td>Get or update customer</td></tr>
+      <tr><td>/api/products</td><td>GET / POST / PUT / DELETE</td><td>Product catalog CRUD</td></tr>
+      <tr><td>/api/stores</td><td>GET / POST / PUT</td><td>Store management</td></tr>
+      <tr><td>/api/purchases/cart</td><td>POST</td><td>Process a sale (cart checkout)</td></tr>
+      <tr><td>/api/purchases</td><td>GET</td><td>Sales history with date filters</td></tr>
+      <tr><td>/api/emi</td><td>GET / POST / PUT</td><td>EMI records management</td></tr>
+      <tr><td>/api/service</td><td>GET / POST / PATCH</td><td>Service requests</td></tr>
+      <tr><td>/api/leads</td><td>GET / POST / PUT</td><td>Lead management</td></tr>
+      <tr><td>/api/followups</td><td>GET / POST / PUT</td><td>Follow-up scheduling</td></tr>
+      <tr><td>/api/deliveries</td><td>GET / POST / PATCH</td><td>Delivery tracking</td></tr>
+      <tr><td>/api/activity</td><td>GET / POST</td><td>Customer activity log</td></tr>
+      <tr><td>/api/users</td><td>GET / POST / PUT</td><td>Staff management</td></tr>
+      <tr><td>/api/dashboard</td><td>GET</td><td>Dashboard statistics</td></tr>
+      <tr><td>/api/reports</td><td>GET</td><td>Sales reports data</td></tr>
+      <tr><td>/api/targets</td><td>GET / POST / PUT</td><td>Sales target management</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 10. FUTURE FEATURES -->
+  <h2 class="section-title">10. Planned Future Features</h2>
+  <div class="card-grid">
+    <div class="module-card yellow">
+      <div class="icon">⭐</div>
+      <h3>Loyalty Points</h3>
+      <p>Earn points on every purchase, redeem as discount on next purchase. Gamify the buying experience.</p>
+    </div>
+    <div class="module-card purple">
+      <div class="icon">🤝</div>
+      <h3>Referral Tracking</h3>
+      <p>Track which customer referred whom. Reward referrers with bonus points or discounts.</p>
+    </div>
+    <div class="module-card blue">
+      <div class="icon">📣</div>
+      <h3>Bulk WhatsApp Campaigns</h3>
+      <p>Send promotional messages to filtered customer groups — warranty expiry, seasonal offers, new arrivals.</p>
+    </div>
+    <div class="module-card green">
+      <div class="icon">📱</div>
+      <h3>PWA (Mobile App)</h3>
+      <p>Install the CRM as a mobile app on Android/iPhone. Work offline, get push notifications.</p>
+    </div>
+    <div class="module-card orange">
+      <div class="icon">⭐</div>
+      <h3>Customer Feedback</h3>
+      <p>Auto-request service rating after resolution. Track satisfaction scores per technician.</p>
+    </div>
+    <div class="module-card teal">
+      <div class="icon">🎯</div>
+      <h3>Target Dashboard</h3>
+      <p>Set monthly targets per staff/store. Live progress bars showing achievement vs target.</p>
+    </div>
+  </div>
+
+  <!-- 11. ACCESS INFO -->
+  <h2 class="section-title">11. Access & Login</h2>
+  <div class="card">
+    <h3 class="sub-title">Demo Credentials</h3>
+    <table class="table">
+      <thead>
+        <tr><th>Role</th><th>Email</th><th>Password</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Admin</td><td>admin@nikshancrm.com</td><td>Nikshan@2026</td></tr>
+        <tr><td>Demo User</td><td>demo@nikshancrm.com</td><td>NikshanDemo@2026</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box">
+      <p>🌐 Local Network Access (Same WiFi): <strong>http://192.168.50.68:3003</strong></p>
+    </div>
+    <div class="highlight-box" style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #22c55e;">
+      <p>🌍 Public Access (ngrok): Run <code>bash /Users/salmanfaris/ipix-crm/share.sh</code> to get a public URL</p>
+    </div>
+  </div>
+
+  <!-- 12. SUMMARY -->
+  <h2 class="section-title">12. Summary</h2>
+  <div class="card">
+    <p>IPIX CRM is a <strong>production-ready</strong>, full-featured business management system built specifically for Nikshan Electronics. It covers the entire customer journey and business operation:</p>
+    <ul style="margin-top: 12px;">
+      <li>✅ <strong>14 functional modules</strong> covering every aspect of the business</li>
+      <li>✅ <strong>5 user roles</strong> with proper access control</li>
+      <li>✅ <strong>GST-compliant billing</strong> with proper invoice format</li>
+      <li>✅ <strong>Split payment</strong> support for flexible transactions</li>
+      <li>✅ <strong>WhatsApp integration</strong> for instant customer communication</li>
+      <li>✅ <strong>Warranty tracking</strong> with automatic expiry calculation</li>
+      <li>✅ <strong>Delivery management</strong> with status tracking</li>
+      <li>✅ <strong>Date filters</strong> on all list pages</li>
+      <li>✅ <strong>Multi-branch</strong> support for future expansion</li>
+      <li>✅ <strong>AI-powered reports</strong> for business insights</li>
+      <li>✅ <strong>Real-time database</strong> via Supabase PostgreSQL</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p style="font-size:20px; font-weight:700; color:white; margin-bottom:8px;">IPIX CRM — Nikshan Electronics</p>
+  <p>Built by IPIX Technologies &nbsp;|&nbsp; Version 2.0 &nbsp;|&nbsp; March 2026</p>
+  <p>React 18 + Node.js + Supabase PostgreSQL</p>
+</div>
+
+</body>
+</html>

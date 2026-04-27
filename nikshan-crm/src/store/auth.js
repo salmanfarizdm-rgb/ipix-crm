@@ -24,8 +24,12 @@ export const useAuth = create((set, get) => ({
       const res = await api.get('/auth/me')
       set({ user: res.data })
     } catch (_) {
+      // Session expired or invalid — clear everything and redirect to login
       localStorage.removeItem('nk_token')
       set({ user: null, token: null })
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
   },
 

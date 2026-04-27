@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { Users, TrendingUp, IndianRupee, Calendar, Wrench, Trophy, ChevronRight } from 'lucide-react'
+import { Users, TrendingUp, IndianRupee, Calendar, Wrench, Trophy, ChevronRight, Package, Truck, AlertTriangle } from 'lucide-react'
 import api from '../lib/api.js'
 import { useAuth } from '../store/auth.js'
 import { format, parseISO } from 'date-fns'
@@ -27,11 +27,15 @@ function StatCard({ icon: Icon, label, value, sub, color }) {
 export default function Dashboard() {
   const [stats, setStats] = useState(null)
   const [perf, setPerf] = useState([])
+  const [lowStock, setLowStock] = useState([])
+  const [pendingDeliveries, setPendingDeliveries] = useState(0)
   const { user } = useAuth()
 
   useEffect(() => {
     api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {})
     api.get('/performance/team?period=month').then(r => setPerf(r.data?.slice(0,3) || [])).catch(() => {})
+    api.get('/products?low_stock=true').then(r => setLowStock(r.data?.filter(p => p.stock_count <= (p.low_stock_threshold || 3)) || [])).catch(() => {})
+    api.get('/deliveries?status=scheduled').then(r => setPendingDeliveries(r.data?.length || 0)).catch(() => {})
   }, [])
 
   if (!stats) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"/></div>
@@ -121,6 +125,46 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Alert Widgets Row */}
+      {(lowStock.length > 0 || pendingDeliveries > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {pendingDeliveries > 0 && (
+            <Link to="/deliveries" className="card flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+                <Truck size={22} className="text-orange-600"/>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-slate-900">{pendingDeliveries}</div>
+                <div className="text-sm text-slate-500">Pending Deliveries</div>
+              </div>
+              <ChevronRight size={16} className="ml-auto text-slate-400"/>
+            </Link>
+          )}
+          {lowStock.length > 0 && (
+            <Link to="/products" className="card hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                  <AlertTriangle size={16} className="text-red-500"/>
+                </div>
+                <div className="font-semibold text-slate-800 text-sm">Low Stock Alert</div>
+                <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">{lowStock.length} items</span>
+              </div>
+              <div className="space-y-1.5">
+                {lowStock.slice(0,3).map(p => (
+                  <div key={p.id} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-700 truncate flex-1">{p.product_name}</span>
+                    <span className={`ml-2 font-bold px-2 py-0.5 rounded-full ${p.stock_count === 0 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {p.stock_count === 0 ? 'OUT' : `${p.stock_count} left`}
+                    </span>
+                  </div>
+                ))}
+                {lowStock.length > 3 && <div className="text-xs text-slate-400">+{lowStock.length-3} more</div>}
+              </div>
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="card">
         <h2 className="font-semibold text-slate-800 mb-4">Quick Actions</h2>
@@ -129,6 +173,7 @@ export default function Dashboard() {
           <Link to="/leads" className="btn-primary">+ Add Lead</Link>
           <Link to="/service" className="btn-primary">+ Service Request</Link>
           <Link to="/followups" className="btn-secondary">+ Follow-up</Link>
+          <Link to="/deliveries" className="btn-secondary">View Deliveries</Link>
         </div>
       </div>
     </div>

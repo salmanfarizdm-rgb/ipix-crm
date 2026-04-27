@@ -1,0 +1,188 @@
+import React from 'react'
+import { Printer, X, Gift } from 'lucide-react'
+import { format } from 'date-fns'
+
+const fmt = n => `₹${Number(n||0).toLocaleString('en-IN')}`
+const fmtDate = d => { try { return format(new Date(d), 'dd MMM yyyy') } catch { return d || '' } }
+
+function buildHtml({ invoice, purchases, customer, store }) {
+  const giftItems = (purchases||[]).filter(p=>p.is_gift)
+  return `<!DOCTYPE html><html><head>
+    <title>Invoice ${invoice?.invoice_number||''}</title>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+      body{padding:32px;background:#fff;color:#1a1a1a}
+      .header{text-align:center;border-bottom:2px solid #432a6f;padding-bottom:16px;margin-bottom:20px}
+      .store-name{font-size:22px;font-weight:800;color:#432a6f}
+      .store-sub{font-size:11px;color:#666;margin-top:4px}
+      .inv-meta{display:flex;justify-content:space-between;margin-bottom:20px;font-size:12px;gap:12px}
+      .inv-meta .block{background:#f8f5ff;padding:10px 14px;border-radius:8px;border:1px solid #e4d9f7;flex:1}
+      .inv-meta .block b{display:block;color:#432a6f;font-size:13px;margin-bottom:4px}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px}
+      th{background:#432a6f;color:#fff;padding:9px 12px;text-align:left;font-size:11px}
+      td{padding:9px 12px;font-size:12px;border-bottom:1px solid #f0ebff}
+      tr:nth-child(even) td{background:#faf7ff}
+      .gift-badge{background:#ec4899;color:#fff;font-size:9px;padding:1px 6px;border-radius:99px;font-weight:700;margin-left:4px}
+      .totals{background:#f8f5ff;border-radius:8px;padding:14px;margin-bottom:20px}
+      .totals table{margin-bottom:0}
+      .totals td{border:none;padding:5px 8px}
+      .grand-total td{font-weight:800;font-size:14px;color:#432a6f;border-top:2px solid #432a6f;padding-top:10px}
+      .footer{text-align:center;font-size:10px;color:#888;border-top:1px solid #eee;padding-top:12px;margin-top:20px}
+      .pay-badge{display:inline-block;background:#432a6f;color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase}
+      @media print{body{padding:20px}}
+    </style>
+  </head><body>
+    <div class="header">
+      <div class="store-name">${store?.name || 'Nikshan Electronics'}</div>
+      <div class="store-sub">${[store?.address, store?.location].filter(Boolean).join(' · ') || 'Kerala, India'}</div>
+      ${store?.phone ? `<div class="store-sub">Ph: ${store.phone}</div>` : ''}
+      <div style="margin-top:8px;font-size:18px;font-weight:700;color:#432a6f">TAX INVOICE</div>
+    </div>
+    <div class="inv-meta">
+      <div class="block">
+        <b>Invoice Details</b>
+        No: <strong>${invoice?.invoice_number || 'N/A'}</strong><br>
+        Date: ${fmtDate(invoice?.purchase_date || new Date())}<br>
+        Payment: <span class="pay-badge">${invoice?.payment_type?.toUpperCase()||'CASH'}</span>
+        ${invoice?.emi_bank ? `<br>Bank: ${invoice.emi_bank}` : ''}
+      </div>
+      <div class="block">
+        <b>Customer</b>
+        ${customer?.name || ''}<br>
+        Ph: ${customer?.phone || ''}<br>
+        ${customer?.address ? customer.address : ''}
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Product</th><th>Brand</th><th>Qty</th>
+        <th>Actual Price</th><th>Discount</th><th>Final Price</th>
+      </tr></thead>
+      <tbody>
+        ${(purchases||[]).map((p,i)=>`<tr>
+          <td>${i+1}</td>
+          <td>${p.product_name||''}${p.model?` (${p.model})`:''}${p.is_gift?'<span class="gift-badge">GIFT</span>':''}</td>
+          <td>${p.brand||'—'}</td>
+          <td>${p.quantity||1}</td>
+          <td>${p.is_gift?'—':fmt(p.actual_price)}</td>
+          <td>${p.is_gift?'—':(p.discount_type&&p.discount_type!=='none'?fmt((p.actual_price||0)*(p.quantity||1)-(p.final_price||0)*(p.quantity||1)):'—')}</td>
+          <td style="font-weight:700;color:${p.is_gift?'#ec4899':'#432a6f'}">${p.is_gift?'FREE':fmt((p.final_price||p.actual_price||0)*(p.quantity||1))}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    <div class="totals">
+      <table>
+        ${invoice?.subtotal!==invoice?.grand_total?`<tr><td>Subtotal</td><td style="text-align:right">${fmt(invoice?.subtotal)}</td></tr>`:''}
+        ${invoice?.total_discount>0?`<tr style="color:#16a34a"><td>Total Discount</td><td style="text-align:right">-${fmt(invoice?.total_discount)}</td></tr>`:''}
+        ${giftItems.length>0?`<tr style="color:#ec4899"><td>Gift Items (${giftItems.length})</td><td style="text-align:right">FREE</td></tr>`:''}
+        <tr class="grand-total"><td>GRAND TOTAL</td><td style="text-align:right">${fmt(invoice?.grand_total)}</td></tr>
+      </table>
+    </div>
+    <div class="footer">
+      Thank you for shopping at ${store?.name||'Nikshan Electronics'}!<br>
+      ${store?.phone||store?.email||''}<br>
+      <small>Generated by IPIX CRM · ${new Date().toLocaleString()}</small>
+    </div>
+  </body></html>`
+}
+
+export default function InvoiceReceipt({ invoice, purchases, customer, store, onClose }) {
+  const giftItems = (purchases||[]).filter(p=>p.is_gift)
+  const nonGift   = (purchases||[]).filter(p=>!p.is_gift)
+
+  const printBill = () => {
+    const html = buildHtml({ invoice, purchases, customer, store })
+    const blob = new Blob([html], { type: 'text/html' })
+    const url  = URL.createObjectURL(blob)
+    const win  = window.open(url, '_blank')
+    if (win) {
+      win.addEventListener('load', () => { win.print(); URL.revokeObjectURL(url) }, { once: true })
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-5 border-b border-slate-100">
+          <div className="text-lg font-bold text-slate-900">🧾 Bill Ready</div>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg"><X size={18} className="text-slate-400"/></button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {/* Invoice meta */}
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="text-xs text-slate-500">Invoice</div>
+              <div className="font-bold text-primary-700 text-lg">{invoice?.invoice_number}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-slate-500">Date</div>
+              <div className="font-medium text-slate-800">{fmtDate(invoice?.purchase_date || new Date())}</div>
+            </div>
+          </div>
+
+          {/* Customer */}
+          <div className="bg-primary-50 border border-primary-100 rounded-xl p-3">
+            <div className="text-xs font-semibold text-primary-600 mb-1">Customer</div>
+            <div className="font-semibold text-slate-900">{customer?.name}</div>
+            <div className="text-sm text-slate-500">{customer?.phone} {customer?.address && `· ${customer.address}`}</div>
+          </div>
+
+          {/* Items */}
+          <div>
+            <div className="text-xs font-semibold text-slate-500 mb-2">ITEMS ({(purchases||[]).length})</div>
+            <div className="space-y-2">
+              {(purchases||[]).map((p,i) => (
+                <div key={p.id||i} className={`flex items-center justify-between p-3 rounded-xl ${p.is_gift?'bg-pink-50 border border-pink-100':'bg-slate-50'}`}>
+                  <div className="flex-1">
+                    <div className="font-medium text-slate-800 text-sm flex items-center gap-2">
+                      {p.product_name}
+                      {p.is_gift && <span className="bg-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1"><Gift size={9}/> GIFT</span>}
+                    </div>
+                    <div className="text-xs text-slate-400">{p.brand} {p.model && `· ${p.model}`} · Qty: {p.quantity||1}</div>
+                  </div>
+                  <div className="text-right ml-3">
+                    {p.is_gift ? (
+                      <div className="text-pink-600 font-semibold text-sm">FREE</div>
+                    ) : (
+                      <>
+                        <div className="font-semibold text-slate-900 text-sm">{fmt((p.final_price||p.actual_price||0)*(p.quantity||1))}</div>
+                        {p.actual_price && p.final_price && parseFloat(p.actual_price) !== parseFloat(p.final_price) && (
+                          <div className="text-xs text-slate-400 line-through">{fmt(p.actual_price)}</div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Totals */}
+          <div className="bg-slate-50 rounded-xl p-4 space-y-1.5 text-sm">
+            {invoice?.subtotal !== invoice?.grand_total && (
+              <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{fmt(invoice?.subtotal)}</span></div>
+            )}
+            {invoice?.total_discount > 0 && (
+              <div className="flex justify-between text-green-600"><span>Total Discount</span><span>-{fmt(invoice?.total_discount)}</span></div>
+            )}
+            {giftItems.length > 0 && (
+              <div className="flex justify-between text-pink-500 text-xs"><span>Gift Items ({giftItems.length})</span><span>Free</span></div>
+            )}
+            <div className="flex justify-between font-bold text-slate-900 text-lg border-t border-slate-200 pt-2 mt-1">
+              <span>Grand Total</span>
+              <span className="text-primary-700">{fmt(invoice?.grand_total)}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button onClick={onClose} className="btn-secondary flex-1">Close</button>
+            <button onClick={printBill} className="btn-primary flex-1 flex items-center justify-center gap-2">
+              <Printer size={16}/> Print Bill
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

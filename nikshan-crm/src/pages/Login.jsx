@@ -4,11 +4,9 @@ import { useAuth } from '../store/auth.js'
 import toast from 'react-hot-toast'
 
 const DEMO = [
-  { role:'Admin',          email:'admin@nikshan.com',           pass:'Admin@123' },
-  { role:'Branch Manager', email:'manager.calicut@nikshan.com', pass:'Manager@123' },
-  { role:'Sales Manager',  email:'salesmanager@nikshan.com',    pass:'Sales@123' },
-  { role:'Sales Exec',     email:'john@nikshan.com',            pass:'Staff@123' },
-  { role:'Technician',     email:'tech@nikshan.com',            pass:'Tech@123' },
+  { role:'Admin',          email:'admin@nikshancrm.com',   pass:'Nikshan@2026' },
+  { role:'Branch Manager', email:'manager@nikshancrm.com', pass:'Manager@2026' },
+  { role:'Sales Exec',     email:'demo@nikshancrm.com',    pass:'NikshanDemo@2026' },
 ]
 
 export default function Login() {

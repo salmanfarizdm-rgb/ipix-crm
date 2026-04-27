@@ -8,6 +8,8 @@ router.get("/", async (req, res) => {
     if (req.query.assigned_to) q = q.eq("assigned_to", req.query.assigned_to);
     if (req.query.done !== undefined) q = q.eq("done", req.query.done === "true");
     if (req.query.customer_id) q = q.eq("customer_id", req.query.customer_id);
+    if (req.query.from)        q = q.gte("due_date", req.query.from);
+    if (req.query.to)          q = q.lte("due_date", req.query.to);
     const today = new Date().toISOString().split("T")[0];
     if (req.query.due === "today") q = q.eq("due_date", today);
     else if (req.query.due === "overdue") q = q.lt("due_date", today).eq("done", false);

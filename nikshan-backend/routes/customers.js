@@ -4,7 +4,7 @@ const db      = require("../supabase");
 
 router.get("/", async (req, res) => {
   try {
-    let q = db.from("nk_customers").select("*, nk_stores(name), nk_users!nk_customers_created_by_fkey(name)").order("created_at", { ascending: false });
+    let q = db.from("nk_customers").select("*, nk_stores(name)").order("created_at", { ascending: false });
     if (req.query.search) q = q.or(`name.ilike.%${req.query.search}%,phone.ilike.%${req.query.search}%`);
     if (req.query.store_id) q = q.eq("store_id", req.query.store_id);
     if (req.query.source) q = q.eq("source", req.query.source);
@@ -19,16 +19,37 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const [cust, purchases, emi, service, followups, interactions] = await Promise.all([
-      db.from("nk_customers").select("*, nk_stores(name), nk_users!nk_customers_created_by_fkey(name)").eq("id", id).single(),
-      db.from("nk_purchases").select("*, nk_users!nk_purchases_sold_by_fkey(name), nk_stores(name)").eq("customer_id", id).order("created_at", { ascending: false }),
-      db.from("nk_emi_records").select("*, nk_purchases(product_name)").eq("customer_id", id).order("created_at", { ascending: false }),
-      db.from("nk_service_requests").select("*, nk_users!nk_service_requests_assigned_to_fkey(name)").eq("customer_id", id).order("created_at", { ascending: false }),
-      db.from("nk_follow_ups").select("*, nk_users!nk_follow_ups_assigned_to_fkey(name)").eq("customer_id", id).order("due_date", { ascending: true }),
-      db.from("nk_customer_interactions").select("*, nk_users(name, role)").eq("customer_id", id).order("created_at", { ascending: false })
+    const [cust, purchases, emi, service, followups, interactions, users, stores] = await Promise.all([
+      db.from("nk_customers").select("*").eq("id", id).single(),
+      db.from("nk_purchases").select("*").eq("customer_id", id).order("created_at", { ascending: false }),
+      db.from("nk_emi_records").select("*").eq("customer_id", id).order("created_at", { ascending: false }),
+      db.from("nk_service_requests").select("*").eq("customer_id", id).order("created_at", { ascending: false }),
+      db.from("nk_follow_ups").select("*").eq("customer_id", id).order("due_date", { ascending: true }),
+      db.from("nk_customer_interactions").select("*").eq("customer_id", id).order("created_at", { ascending: false }),
+      db.from("nk_users").select("id, name, role"),
+      db.from("nk_stores").select("id, name")
     ]);
     if (cust.error) return res.status(404).json({ success: false, error: "Customer not found" });
-    res.json({ success: true, data: { ...cust.data, purchases: purchases.data, emi: emi.data, service: service.data, followups: followups.data, interactions: interactions.data } });
+
+    // Build lookup maps
+    const userMap  = Object.fromEntries((users.data  || []).map(u => [u.id, u]));
+    const storeMap = Object.fromEntries((stores.data || []).map(s => [s.id, s]));
+
+    // Enrich records
+    const enrichPurchase = p => ({ ...p, nk_users: userMap[p.sold_by] || null, nk_stores: storeMap[p.store_id] || null });
+    const enrichSvc      = s => ({ ...s, nk_users: userMap[s.assigned_to] || null });
+    const enrichFu       = f => ({ ...f, nk_users: userMap[f.assigned_to] || null });
+    const enrichInt      = i => ({ ...i, nk_users: userMap[i.user_id] || null });
+
+    res.json({ success: true, data: {
+      ...cust.data,
+      nk_stores: storeMap[cust.data.store_id] || null,
+      purchases:    (purchases.data    || []).map(enrichPurchase),
+      emi:          (emi.data          || []),
+      service:      (service.data      || []).map(enrichSvc),
+      followups:    (followups.data    || []).map(enrichFu),
+      interactions: (interactions.data || []).map(enrichInt),
+    }});
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

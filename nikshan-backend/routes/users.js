@@ -4,16 +4,23 @@ const db      = require("../supabase");
 const { supabaseAuth } = require("../supabase");
 
 router.get("/", async (req, res) => {
-  let q = db.from("nk_users").select("id, name, email, role, store_id, phone, active, last_login, nk_stores(name)").order("name");
-  if (req.query.store_id) q = q.eq("store_id", req.query.store_id);
-  if (req.query.role) q = q.eq("role", req.query.role);
-  const { data, error } = await q;
-  if (error) return res.status(500).json({ success: false, error: error.message });
-  res.json({ success: true, data });
+  try {
+    let q = db.from("nk_users").select("id, name, email, role, store_id, phone, active, last_login").order("name");
+    if (req.query.store_id) q = q.eq("store_id", req.query.store_id);
+    if (req.query.role) q = q.eq("role", req.query.role);
+    const { data: users, error } = await q;
+    if (error) throw error;
+    const { data: stores } = await db.from("nk_stores").select("id, name");
+    const storeMap = Object.fromEntries((stores || []).map(s => [s.id, s]));
+    const enriched = (users || []).map(u => ({ ...u, nk_stores: storeMap[u.store_id] || null }));
+    res.json({ success: true, data: enriched });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 router.get("/:id", async (req, res) => {
-  const { data, error } = await db.from("nk_users").select("*, nk_stores(name)").eq("id", req.params.id).single();
+  const { data, error } = await db.from("nk_users").select("*").eq("id", req.params.id).single();
   if (error) return res.status(404).json({ success: false, error: "User not found" });
   res.json({ success: true, data });
 });

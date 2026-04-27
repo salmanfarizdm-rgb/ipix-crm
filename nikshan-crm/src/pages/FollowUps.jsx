@@ -5,6 +5,13 @@ import toast from 'react-hot-toast'
 import { Plus, X, Check, Calendar, Clock, AlertCircle } from 'lucide-react'
 import { format, isPast, isToday, parseISO } from 'date-fns'
 
+const QUICK_PERIODS = [
+  { label:'Today',      getDates:()=>{ const t=new Date().toISOString().split('T')[0]; return {from:t,to:t} } },
+  { label:'This Week',  getDates:()=>{ const t=new Date(),f=new Date(t); f.setDate(t.getDate()-7); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+  { label:'This Month', getDates:()=>{ const n=new Date(); return {from:new Date(n.getFullYear(),n.getMonth(),1).toISOString().split('T')[0],to:n.toISOString().split('T')[0]} } },
+  { label:'Last Month', getDates:()=>{ const n=new Date(),f=new Date(n.getFullYear(),n.getMonth()-1,1),t=new Date(n.getFullYear(),n.getMonth(),0); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+]
+
 const TYPES = ['call','visit','demo','service_check','whatsapp']
 const fmtDate = d => { try { return format(parseISO(d), 'dd MMM yyyy') } catch { return d } }
 
@@ -94,25 +101,39 @@ function FollowUpCard({ f, onDone }) {
   )
 }
 
+const STATUS_TABS = [
+  { key: 'all',       label: 'All' },
+  { key: 'pending',   label: 'Pending' },
+  { key: 'overdue',   label: 'Overdue' },
+  { key: 'completed', label: 'Completed' },
+]
+
 export default function FollowUps() {
   const [followups, setFollowups] = useState([])
   const [customers, setCustomers] = useState([])
   const [users, setUsers] = useState([])
   const [showAdd, setShowAdd] = useState(false)
-  const [myOnly, setMyOnly] = useState(false)
-  const [showDone, setShowDone] = useState(false)
+  const [activeTab, setActiveTab] = useState('pending')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [activePeriod, setActivePeriod] = useState('')
+  const [showCustom, setShowCustom] = useState(false)
   const [loading, setLoading] = useState(true)
-  const { user, canSeeAll } = useAuth()
+  const { user } = useAuth()
+
+  const applyPeriod = (label, dates) => { setActivePeriod(label); setFrom(dates.from); setTo(dates.to); setShowCustom(false) }
+  const clearDates  = () => { setFrom(''); setTo(''); setActivePeriod(''); setShowCustom(false) }
 
   const load = () => {
     setLoading(true)
     const p = new URLSearchParams()
-    if (myOnly && user) p.set('assigned_to', user.id)
+    if (from) p.set('from', from)
+    if (to)   p.set('to', to)
     api.get(`/followups?${p}`).then(r => setFollowups(r.data||[])).finally(()=>setLoading(false))
     api.get('/customers').then(r => setCustomers(r.data||[]))
     api.get('/users').then(r => setUsers(r.data||[]))
   }
-  useEffect(load, [myOnly])
+  useEffect(load, [from, to])
 
   const markDone = async (id, outcome) => {
     await api.patch(`/followups/${id}/done`, { outcome })
@@ -121,51 +142,117 @@ export default function FollowUps() {
   }
 
   const today = new Date().toISOString().split('T')[0]
-  const all = showDone ? followups : followups.filter(f => !f.done)
-  const todayItems  = all.filter(f => f.due_date === today && !f.done)
-  const overdueItems = all.filter(f => f.due_date < today && !f.done)
-  const upcomingItems = all.filter(f => f.due_date > today && !f.done)
-  const doneItems = followups.filter(f => f.done)
+  const overdue  = followups.filter(f => !f.done && f.due_date < today)
+  const pending  = followups.filter(f => !f.done && f.due_date >= today)
+  const completed = followups.filter(f => f.done)
+
+  const todayItems    = pending.filter(f => f.due_date === today)
+  const upcomingItems = pending.filter(f => f.due_date > today)
+
+  let displayed = []
+  if (activeTab === 'all')       displayed = followups
+  if (activeTab === 'pending')   displayed = pending
+  if (activeTab === 'overdue')   displayed = overdue
+  if (activeTab === 'completed') displayed = completed
+
+  const counts = {
+    all: followups.length,
+    pending: pending.length,
+    overdue: overdue.length,
+    completed: completed.length,
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-xl font-bold text-slate-900">Follow-ups</h1><p className="text-sm text-slate-500">{all.length} pending</p></div>
-        <div className="flex items-center gap-3">
-          {canSeeAll() && <label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={myOnly} onChange={e=>setMyOnly(e.target.checked)} className="rounded"/>My only</label>}
-          <label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" checked={showDone} onChange={e=>setShowDone(e.target.checked)} className="rounded"/>Show done</label>
-          <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2"><Plus size={16}/> Schedule</button>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Follow-ups</h1>
+          <p className="text-sm text-slate-500">{pending.length} pending · {overdue.length} overdue</p>
         </div>
+        <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2">
+          <Plus size={16}/> Schedule
+        </button>
+      </div>
+
+      {/* Date filter */}
+      <div className="card py-3 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {QUICK_PERIODS.map(p => (
+            <button key={p.label} onClick={() => applyPeriod(p.label, p.getDates())}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePeriod===p.label?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+              {p.label}
+            </button>
+          ))}
+          <button onClick={() => setShowCustom(!showCustom)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${showCustom?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            Custom
+          </button>
+          {(from || to) && (
+            <button onClick={clearDates} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700">
+              <X size={11}/> Clear dates
+            </button>
+          )}
+        </div>
+        {showCustom && (
+          <div className="flex items-center gap-2 text-xs">
+            <label className="text-slate-500">From</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={from} onChange={e=>{setFrom(e.target.value);setActivePeriod('Custom')}} />
+            <label className="text-slate-500">To</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={to} onChange={e=>{setTo(e.target.value);setActivePeriod('Custom')}} />
+          </div>
+        )}
+      </div>
+
+      {/* Status tabs */}
+      <div className="flex gap-2">
+        {STATUS_TABS.map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              activeTab === t.key
+                ? 'bg-primary-600 text-white'
+                : t.key === 'overdue' && overdue.length > 0
+                  ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}>
+            {t.label}
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${activeTab === t.key ? 'bg-white/25' : 'bg-slate-100 text-slate-500'}`}>
+              {counts[t.key]}
+            </span>
+          </button>
+        ))}
       </div>
 
       {loading ? <div className="text-center py-8 text-slate-400">Loading...</div> : (
         <div className="space-y-6">
-          {todayItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3"><Calendar size={16} className="text-blue-500"/><h2 className="font-semibold text-slate-700">Today ({todayItems.length})</h2></div>
-              <div className="space-y-2">{todayItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
-            </div>
+          {/* Grouped view for Pending tab */}
+          {activeTab === 'pending' && (
+            <>
+              {todayItems.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3"><Clock size={16} className="text-primary-500"/><h2 className="font-semibold text-slate-700">Today ({todayItems.length})</h2></div>
+                  <div className="space-y-2">{todayItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
+                </div>
+              )}
+              {upcomingItems.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3"><Calendar size={16} className="text-slate-400"/><h2 className="font-semibold text-slate-700">Upcoming ({upcomingItems.length})</h2></div>
+                  <div className="space-y-2">{upcomingItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
+                </div>
+              )}
+              {pending.length === 0 && (
+                <div className="text-center py-16 text-slate-400"><Calendar size={40} className="mx-auto mb-3 text-slate-200"/><p>No pending follow-ups</p></div>
+              )}
+            </>
           )}
-          {overdueItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3"><AlertCircle size={16} className="text-red-500"/><h2 className="font-semibold text-red-700">Overdue ({overdueItems.length})</h2></div>
-              <div className="space-y-2">{overdueItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
+
+          {/* Flat list for other tabs */}
+          {activeTab !== 'pending' && (
+            <div className="space-y-2">
+              {displayed.length === 0
+                ? <div className="text-center py-12 text-slate-400"><Calendar size={36} className="mx-auto mb-3 text-slate-200"/><p>No {activeTab} follow-ups</p></div>
+                : displayed.map(f => <FollowUpCard key={f.id} f={f} onDone={markDone}/>)
+              }
             </div>
-          )}
-          {upcomingItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3"><Calendar size={16} className="text-slate-400"/><h2 className="font-semibold text-slate-700">Upcoming ({upcomingItems.length})</h2></div>
-              <div className="space-y-2">{upcomingItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
-            </div>
-          )}
-          {showDone && doneItems.length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-3"><Check size={16} className="text-green-500"/><h2 className="font-semibold text-slate-500">Completed ({doneItems.length})</h2></div>
-              <div className="space-y-2">{doneItems.map(f=><FollowUpCard key={f.id} f={f} onDone={markDone}/>)}</div>
-            </div>
-          )}
-          {todayItems.length===0 && overdueItems.length===0 && upcomingItems.length===0 && !showDone && (
-            <div className="text-center py-16 text-slate-400"><Calendar size={40} className="mx-auto mb-3 text-slate-200"/><p>No pending follow-ups 🎉</p></div>
           )}
         </div>
       )}

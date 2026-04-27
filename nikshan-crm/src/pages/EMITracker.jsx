@@ -2,24 +2,40 @@ import React, { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import api from '../lib/api.js'
 import toast from 'react-hot-toast'
-import { CreditCard, TrendingUp, Building } from 'lucide-react'
+import { CreditCard, TrendingUp, Building, X } from 'lucide-react'
 
 const fmt = n => `₹${Number(n).toLocaleString('en-IN')}`
+
+const QUICK_PERIODS = [
+  { label:'Today',      getDates:()=>{ const t=new Date().toISOString().split('T')[0]; return {from:t,to:t} } },
+  { label:'This Week',  getDates:()=>{ const t=new Date(),f=new Date(t); f.setDate(t.getDate()-7); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+  { label:'This Month', getDates:()=>{ const n=new Date(); return {from:new Date(n.getFullYear(),n.getMonth(),1).toISOString().split('T')[0],to:n.toISOString().split('T')[0]} } },
+  { label:'Last Month', getDates:()=>{ const n=new Date(),f=new Date(n.getFullYear(),n.getMonth()-1,1),t=new Date(n.getFullYear(),n.getMonth(),0); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+]
 
 export default function EMITracker() {
   const [records, setRecords] = useState([])
   const [bankFilter, setBankFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [activePeriod, setActivePeriod] = useState('')
+  const [showCustom, setShowCustom] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const applyPeriod = (label, dates) => { setActivePeriod(label); setFrom(dates.from); setTo(dates.to); setShowCustom(false) }
+  const clearDates  = () => { setFrom(''); setTo(''); setActivePeriod(''); setShowCustom(false) }
 
   const load = () => {
     setLoading(true)
     const p = new URLSearchParams()
     if (bankFilter) p.set('bank_name', bankFilter)
     if (statusFilter) p.set('status', statusFilter)
+    if (from) p.set('from', from)
+    if (to)   p.set('to', to)
     api.get(`/emi?${p}`).then(r => setRecords(r.data||[])).finally(()=>setLoading(false))
   }
-  useEffect(load, [bankFilter, statusFilter])
+  useEffect(load, [bankFilter, statusFilter, from, to])
 
   const active = records.filter(r=>r.status==='active')
   const totalMonthly = active.reduce((s,r)=>s+parseFloat(r.monthly_emi||0),0)
@@ -66,18 +82,45 @@ export default function EMITracker() {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap">
-        <select className="select w-48" value={bankFilter} onChange={e=>setBankFilter(e.target.value)}>
-          <option value="">All Banks</option>
-          {banks.map(b=><option key={b} value={b}>{b}</option>)}
-        </select>
-        <select className="select w-40" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="closed">Closed</option>
-          <option value="defaulted">Defaulted</option>
-        </select>
+      {/* Date filter */}
+      <div className="card py-3 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {QUICK_PERIODS.map(p => (
+            <button key={p.label} onClick={() => applyPeriod(p.label, p.getDates())}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePeriod===p.label?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+              {p.label}
+            </button>
+          ))}
+          <button onClick={() => setShowCustom(!showCustom)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${showCustom?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            Custom
+          </button>
+          {(from || to) && (
+            <button onClick={clearDates} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700">
+              <X size={11}/> Clear dates
+            </button>
+          )}
+        </div>
+        {showCustom && (
+          <div className="flex items-center gap-2 text-xs">
+            <label className="text-slate-500">From</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={from} onChange={e=>{setFrom(e.target.value);setActivePeriod('Custom')}} />
+            <label className="text-slate-500">To</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={to} onChange={e=>{setTo(e.target.value);setActivePeriod('Custom')}} />
+          </div>
+        )}
+        <div className="flex gap-3 flex-wrap">
+          <select className="select w-48" value={bankFilter} onChange={e=>setBankFilter(e.target.value)}>
+            <option value="">All Banks</option>
+            {banks.map(b=><option key={b} value={b}>{b}</option>)}
+          </select>
+          <select className="select w-40" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="closed">Closed</option>
+            <option value="defaulted">Defaulted</option>
+          </select>
+        </div>
       </div>
 
       {/* Table */}

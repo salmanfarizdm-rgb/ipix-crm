@@ -14,8 +14,17 @@ const ServiceReqs  = lazy(() => import('./pages/ServiceRequests.jsx'))
 const FollowUps    = lazy(() => import('./pages/FollowUps.jsx'))
 const TeamPerf     = lazy(() => import('./pages/TeamPerformance.jsx'))
 const Reports      = lazy(() => import('./pages/Reports.jsx'))
+const Stores       = lazy(() => import('./pages/Stores.jsx'))
+const Products     = lazy(() => import('./pages/Products.jsx'))
+const AIReports    = lazy(() => import('./pages/AIReports.jsx'))
+const UsersPage    = lazy(() => import('./pages/Users.jsx'))
+const Deliveries   = lazy(() => import('./pages/Deliveries.jsx'))
 
-const Spin = () => <div className="flex items-center justify-center h-screen"><div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"/></div>
+const Spin = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"/>
+  </div>
+)
 
 function ProtectedRoute({ children, roles }) {
   const { token, user } = useAuth()
@@ -32,16 +41,21 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="customers" element={<Customers />} />
+            <Route path="dashboard"    element={<Dashboard />} />
+            <Route path="customers"    element={<Customers />} />
             <Route path="customers/:id" element={<CustomerDetail />} />
-            <Route path="leads" element={<Leads />} />
-            <Route path="purchases" element={<Purchases />} />
-            <Route path="emi" element={<EMITracker />} />
-            <Route path="service" element={<ServiceReqs />} />
-            <Route path="followups" element={<FollowUps />} />
-            <Route path="performance" element={<ProtectedRoute roles={['admin','branch_manager','sales_manager']}><TeamPerf /></ProtectedRoute>} />
-            <Route path="reports" element={<ProtectedRoute roles={['admin','branch_manager']}><Reports /></ProtectedRoute>} />
+            <Route path="leads"        element={<Leads />} />
+            <Route path="purchases"    element={<Purchases />} />
+            <Route path="emi"          element={<EMITracker />} />
+            <Route path="service"      element={<ServiceReqs />} />
+            <Route path="followups"    element={<FollowUps />} />
+            <Route path="performance"  element={<ProtectedRoute roles={['admin','branch_manager','sales_manager']}><TeamPerf /></ProtectedRoute>} />
+            <Route path="reports"      element={<ProtectedRoute roles={['admin','branch_manager']}><Reports /></ProtectedRoute>} />
+            <Route path="stores"       element={<ProtectedRoute roles={['admin','branch_manager']}><Stores /></ProtectedRoute>} />
+            <Route path="products"     element={<ProtectedRoute roles={['admin','branch_manager','sales_manager']}><Products /></ProtectedRoute>} />
+            <Route path="ai-reports"   element={<ProtectedRoute roles={['admin','branch_manager','sales_manager']}><AIReports /></ProtectedRoute>} />
+            <Route path="users"         element={<ProtectedRoute roles={['admin']}><UsersPage /></ProtectedRoute>} />
+            <Route path="deliveries"    element={<Deliveries />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

@@ -4,6 +4,13 @@ import { useAuth } from '../store/auth.js'
 import toast from 'react-hot-toast'
 import { Plus, X, Phone, IndianRupee, Trophy, AlertCircle } from 'lucide-react'
 
+const QUICK_PERIODS = [
+  { label:'Today',      getDates:()=>{ const t=new Date().toISOString().split('T')[0]; return {from:t,to:t} } },
+  { label:'This Week',  getDates:()=>{ const t=new Date(),f=new Date(t); f.setDate(t.getDate()-7); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+  { label:'This Month', getDates:()=>{ const n=new Date(); return {from:new Date(n.getFullYear(),n.getMonth(),1).toISOString().split('T')[0],to:n.toISOString().split('T')[0]} } },
+  { label:'Last Month', getDates:()=>{ const n=new Date(),f=new Date(n.getFullYear(),n.getMonth()-1,1),t=new Date(n.getFullYear(),n.getMonth(),0); return {from:f.toISOString().split('T')[0],to:t.toISOString().split('T')[0]} } },
+]
+
 const COLS = [
   { key:'new',         label:'New',         color:'bg-slate-100 text-slate-700',    dot:'bg-slate-400' },
   { key:'contacted',   label:'Contacted',   color:'bg-blue-100 text-blue-700',      dot:'bg-blue-400' },
@@ -293,14 +300,24 @@ export default function Leads() {
   const [lostLead, setLostLead] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
   const [search, setSearch] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [activePeriod, setActivePeriod] = useState('')
+  const [showCustom, setShowCustom] = useState(false)
   const { user } = useAuth()
 
+  const applyPeriod = (label, dates) => { setActivePeriod(label); setFrom(dates.from); setTo(dates.to); setShowCustom(false) }
+  const clearDates  = () => { setFrom(''); setTo(''); setActivePeriod(''); setShowCustom(false) }
+
   const load = () => {
-    api.get('/leads').then(r => setLeads(r.data || [])).catch(() => {})
+    const p = new URLSearchParams()
+    if (from) p.set('from', from)
+    if (to)   p.set('to', to)
+    api.get(`/leads?${p}`).then(r => setLeads(r.data || [])).catch(() => {})
     api.get('/users').then(r => setUsers(r.data || [])).catch(() => {})
     api.get('/stores').then(r => setStores(r.data || [])).catch(() => {})
   }
-  useEffect(load, [])
+  useEffect(load, [from, to])
 
   const moveStatus = async (id, status) => {
     try { await api.patch(`/leads/${id}/status`, { status }); load(); toast.success('Status updated') }
@@ -317,6 +334,35 @@ export default function Leads() {
           <p className="text-sm text-slate-500">{leads.length} total leads</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary flex items-center gap-2"><Plus size={16}/> Add Lead</button>
+      </div>
+
+      {/* Date filter */}
+      <div className="card py-3 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {QUICK_PERIODS.map(p => (
+            <button key={p.label} onClick={() => applyPeriod(p.label, p.getDates())}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activePeriod===p.label?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+              {p.label}
+            </button>
+          ))}
+          <button onClick={() => setShowCustom(!showCustom)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${showCustom?'bg-primary-600 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            Custom
+          </button>
+          {(from || to) && (
+            <button onClick={clearDates} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700">
+              <X size={11}/> Clear dates
+            </button>
+          )}
+        </div>
+        {showCustom && (
+          <div className="flex items-center gap-2 text-xs">
+            <label className="text-slate-500">From</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={from} onChange={e=>{setFrom(e.target.value);setActivePeriod('Custom')}} />
+            <label className="text-slate-500">To</label>
+            <input type="date" className="input w-32 py-1.5 text-xs" value={to} onChange={e=>{setTo(e.target.value);setActivePeriod('Custom')}} />
+          </div>
+        )}
       </div>
 
       <input className="input max-w-xs" placeholder="Search leads..." value={search} onChange={e=>setSearch(e.target.value)} />
